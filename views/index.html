@@ -2,7 +2,7 @@
 <html lang="en">
 <head> 
 	<meta charset="utf-8"/> 
-	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
 <script>
 	function addItem()
 	{
@@ -13,17 +13,32 @@
         };
 		
 		$.ajax({
-		url: '/addtask',
-		type: 'POST',
-		data: task,
-		success: function() { alert('PUT completed'); }
-	});
+			url: '/addtask',
+			type: 'POST',
+			data: task,
+			success: function() { alert('PUT completed'); }
+			});
 	}
 </script>
 </head>
 <body>
- This is the index file
+	<h3>Tasks</h3>
+	<form data-bind="submit: addTask">
+    Add task: <input data-bind="value: newTaskText" placeholder="What needs to be done?" />
+    <button type="submit">Add</button>
+</form>
+
+<ul data-bind="foreach: tasks, visible: tasks().length > 0">
+    <li>
+        <input type="checkbox" data-bind="checked: isDone" />
+        <input data-bind="value: title, disable: isDone" />
+        <a href="#" data-bind="click: $parent.removeTask">Delete</a>
+    </li> 
+</ul>
  
- <button type="button" onclick="addItem()">Add item!</button>
 </body>
+<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
+
+<script type="text/javaScript" src="komodels/taskmodel.js"></script> 
 </html>
