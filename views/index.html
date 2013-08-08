@@ -2,8 +2,28 @@
 <html lang="en">
 <head> 
 	<meta charset="utf-8"/> 
+	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script>
+	function addItem()
+	{
+	   alert('we will try');
+		var task = {
+            name: "taskname",
+            active: false
+        };
+		
+		$.ajax({
+		url: '/addtask',
+		type: 'POST',
+		data: task,
+		success: function() { alert('PUT completed'); }
+	});
+	}
+</script>
 </head>
 <body>
  This is the index file
+ 
+ <button type="button" onclick="addItem()">Add item!</button>
 </body>
 </html>

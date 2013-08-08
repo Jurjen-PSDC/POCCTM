@@ -12,16 +12,17 @@ TasksList.prototype = {
     self = this;
     var query = azure.TableQuery
       .select()
-      .from(self.tasks.tableName)
-      .where('active eq ?', 'Yes');
+      .from(self.tasks.tableName);
+      //.where('active eq ?', 'Yes');
     self.tasks.find(query, function itemsFound(err, items) {
       res.json({title: 'The tasks ', tasks: items});
     });
   },
  
    addTask: function(req,res) {
-    var self = this
-    var item = req.body.item;
+    var self = this;
+	console.log("RE " + JSON.stringify(req.body));
+    var item = req.body;
     self.tasks.addItem(item, function itemAdded(err) {
       if(err) {
         throw err;
