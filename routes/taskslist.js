@@ -21,9 +21,9 @@ TasksList.prototype = {
  
    addTask: function(req,res) {
     var self = this;
-	console.log("RE " + JSON.stringify(req.body));
     var item = req.body;
-    self.tasks.addItem(item, function itemAdded(err) {
+	console.log("Adding a task :" + item.name);
+	 self.tasks.addItem(item, function itemAdded(err) {
       if(err) {
         throw err;
       }
