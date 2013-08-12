@@ -2,37 +2,24 @@
 <html lang="en">
 <head> 
 	<meta charset="utf-8"/> 
-
-<script>
-	function addItem()
-	{
-	   alert('we will try');
-		var task = {
-            name: "taskname",
-            active: false
-        };
-		
-		$.ajax({
-			url: '/addtask',
-			type: 'POST',
-			data: task,
-			success: function() { alert('PUT completed'); }
-			});
-	}
-</script>
 </head>
 <body>
 	<h3>Tasks</h3>
 	<form data-bind="submit: addTask">
-    Add task: <input data-bind="value: newTaskText" placeholder="What needs to be done?" />
-    <button type="submit">Add</button>
+    Add task: <input data-bind="value: newTaskText" placeholder="What needs to be done?" /> 
+	<select data-bind="options:fromToList, value:From, optionsCaption: 'Choose...'"></select>
+    <select data-bind="options:fromToList, value:Duration, optionsCaption: 'Choose...'"></select>
+
+	<button type="submit">Add</button>
 	</form>
 
 <table>
-    <thead><tr><th>Name</th><th>Active</th></tr></thead>
+    <thead><tr><th>Name</th><th>Start</th><th>Finish</th><th>Active</th></tr></thead>
     <tbody data-bind="foreach:tasks">
         <tr>
             <td data-bind="text:name"></td>
+			<td data-bind="text:start"></td>
+			<td data-bind="text:finish"></td>
             <td data-bind="text:completed"></td>
         </tr>     
     </tbody>
