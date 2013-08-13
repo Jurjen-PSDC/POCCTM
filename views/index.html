@@ -1,33 +1,67 @@
 <!DOCTYPE html>
-<html lang="en">
-<head> 
-	<meta charset="utf-8"/> 
+<html>
+  <head>
+	<title> CTM 2.0 Beta </title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/> 
+	<!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">	
 </head>
 <body>
-	<h3>Tasks</h3>
-	<form data-bind="submit: addTask">
-    Add task: <input data-bind="value: newTaskText" placeholder="What needs to be done?" /> 
-	<select data-bind="options:fromToList, value:From, optionsCaption: 'Choose...'"></select>
-    <select data-bind="options:fromToList, value:Duration, optionsCaption: 'Choose...'"></select>
 
-	<button type="submit">Add</button>
-	</form>
+<!-- NAVIGATION -->
+      
+<div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="#">CTM 2.0 BETA</a>
+    <ul class="nav">
+      <li class="active"><a href="#">Taken</a></li>
+      <li><a href="#">Link</a></li>
+      <li><a href="#">Link</a></li>
+    </ul>
+  </div>
+</div>
 
-<table>
-    <thead><tr><th>Name</th><th>Start</th><th>Finish</th><th>Active</th></tr></thead>
-    <tbody data-bind="foreach:tasks">
-        <tr>
-            <td data-bind="text:name"></td>
-			<td data-bind="text:start"></td>
-			<td data-bind="text:finish"></td>
-            <td data-bind="text:completed"></td>
-        </tr>     
-    </tbody>
-</table>
- 
+<!-- MAIN CONTENT -->
+<div class="row-fluid">
+
+<!-- SUB NAV LEFT -->
+	<div class="span2">
+		<ul class="nav nav-list">
+			<li class="nav-header">Werkmomenten</li>
+			<li class="active"><a href="#">Top 20</a></li>
+			<li><a href="#">Bewerken</a></li>
+			<li class="nav-header">Daily standup A1</li>
+			<li class="nav-header">Etc.</li>
+			<li class="nav-header">Voeg toe</li>
+		</ul>
+	</div>
+<!-- END SUB NAV LEFT -->
+
+ <!-- MAIN APP SPACE -->
+<div class="span10">
+
+	<table class="table table-striped">
+		<caption>Tasks</caption>
+		<thead><tr><th>Name</th><th>GroupId</th><th>Customer</th><th>Project</th><th>Assigned to</th><th>Supply Moment</th></tr></thead>
+		<tbody data-bind="foreach:tasksStatic">
+			<tr>
+				<td data-bind="text:name"></td>
+				<td data-bind="text:groupId"></td>
+				<td data-bind="text:customerId"></td>
+				<td data-bind="text:projectId"></td>
+				<td data-bind="text:assignedTo"></td>
+				<td data-bind="text:supplyMoment"></td>
+			</tr>     
+		</tbody>
+	</table>
+ </div>
+<!-- END MAIN APP SPACE -->
+</div>
+<!-- END MAIN CONTENT --> 
 </body>
 <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script src="/js/bootstrap-responsive.min.js"></script>
 <script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
-
 <script type="text/javaScript" src="komodels/taskmodel.js"></script> 
 </html>

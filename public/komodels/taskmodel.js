@@ -1,9 +1,15 @@
-function TaskModel(name, start, finish){
+function TaskModel(name, groupId, projectId, customerId,  taskId, priority, supplyMoment, assignedTo){
 	var self = this;
 	self.name = name;
-	self.completed = false;
-	self.start = start;
-	self.finish = finish;
+	self.groupId = groupId;
+	self.customerId = customerId;
+	self.completed = 0;
+	self.projectId = projectId;
+	self.taskId = taskId,
+	self.priority = priority;
+	self.supplyMoment = supplyMoment;
+	self.assignedTo = assignedTo;
+	self.reasonForDelay = "";
 }
 
 function TaskListViewModel() {
@@ -19,6 +25,41 @@ function TaskListViewModel() {
     });
 
 	self.fromToList = new Array("0","1","2", "3", "4", "5", "6", "7", "8", "9");
+	
+	self.tasksStatic = ko.observableArray([
+		new TaskModel("Plan van aanpak", "TEAM1", "Project1", "Klant1", 10000, 1, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Mening ouder/jongere verwerkt", "TEAM2", "ProjectB", "Klant1", 10001, 2, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Evaluatie rapportage", "TEAM2", "ProjectB", "Klant2", 10002, 3, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Risico Taxatie", "Deskundige", "ProjectB", "Klant2", 10003, 4, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Intake gesprek slachtoffer", "TEAM1", "ProjectA", "Klant2", 10004, 5, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Overleg behandelaars", "TEAM2", "ProjectA", "Klant2", 10005, 6, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Verwerken formulier", "Administratie", "ProjectB", "Klant2", 10006, 7, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Zaak analyse gedragwetenschapper", "TEAM1", "Project1", "Klant1", 10007, 8, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Plan van aanpak", "TEAM1", "Project1", "Klant1", 10000, 9, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Mening ouder/jongere verwerkt", "TEAM2", "ProjectB", "Klant1", 10001, 10, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Evaluatie rapportage", "TEAM2", "ProjectB", "Klant2", 10002, 11, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Risico Taxatie", "Deskundige", "ProjectB", "Klant2", 10003, 12, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Intake gesprek slachtoffer", "TEAM1", "ProjectA", "Klant2", 10004, 13, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Overleg behandelaars", "TEAM2", "ProjectA", "Klant2", 10005, 14, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Verwerken formulier", "Administratie", "ProjectB", "Klant2", 10006, 15, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Zaak analyse gedragwetenschapper", "TEAM1", "Project1", "Klant1", 10007, 16, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Plan van aanpak", "TEAM1", "Project1", "Klant1", 10000, 17, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Mening ouder/jongere verwerkt", "TEAM2", "ProjectB", "Klant1", 10001, 18, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Evaluatie rapportage", "TEAM2", "ProjectB", "Klant2", 10002, 19, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Risico Taxatie", "Deskundige", "ProjectB", "Klant2", 10003, 20, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Intake gesprek slachtoffer", "TEAM1", "ProjectA", "Klant2", 10004, 21, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Overleg behandelaars", "TEAM2", "ProjectA", "Klant2", 10005, 22, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Verwerken formulier", "Administratie", "ProjectB", "Klant2", 10006, 23, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Zaak analyse gedragwetenschapper", "TEAM1", "Project1", "Klant1", 10007, 24, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Plan van aanpak", "TEAM1", "Project1", "Klant1", 10000, 25, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Mening ouder/jongere verwerkt", "TEAM2", "ProjectB", "Klant1", 10001, 26, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Evaluatie rapportage", "TEAM2", "ProjectB", "Klant2", 10002, 27, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Risico Taxatie", "Deskundige", "ProjectB", "Klant2", 10003, 28, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Intake gesprek slachtoffer", "TEAM1", "ProjectA", "Klant2", 10004, 29, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Overleg behandelaars", "TEAM2", "ProjectA", "Klant2", 10005, 30, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Verwerken formulier", "Administratie", "ProjectB", "Klant2", 10006, 31, new Date(2013,8,14,12,00,0), "Jurjen"),
+		new TaskModel("Zaak analyse gedragwetenschapper", "TEAM1", "Project1", "Klant1", 10007, 32, new Date(2013,8,14,12,00,0), "Jurjen")
+	]);
 	
 	
     // Operations
