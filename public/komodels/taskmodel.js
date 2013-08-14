@@ -29,10 +29,6 @@ function TaskListViewModel() {
         return ko.utils.arrayFilter(self.tasks(), function(task) { return !task.completed });
     });
 
-	self.ticks = ko.computed(function() {
-        return this.supplyMoment.getTime();
-    });	
-	
 	self.fromToList = new Array("0","1","2", "3", "4", "5", "6", "7", "8", "9");
 	
 	self.tasksStatic = ko.observableArray([
