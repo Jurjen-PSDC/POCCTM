@@ -7,10 +7,15 @@ function TaskModel(name, groupId, projectId, customerId,  taskId, priority, supp
 	self.projectId = projectId;
 	self.taskId = taskId,
 	self.priority = priority;
-	self.supplyMoment = supplyMoment;
+	self.supplyMoment = ko.observable(supplyMoment);
 	self.assignedTo = assignedTo;
 	self.reasonForDelay = "";
+	
+	
+	
 }
+
+
 
 function TaskListViewModel() {
     // Data
@@ -24,6 +29,10 @@ function TaskListViewModel() {
         return ko.utils.arrayFilter(self.tasks(), function(task) { return !task.completed });
     });
 
+	self.ticks = ko.computed(function() {
+        return this.supplyMoment.getTime();
+    });	
+	
 	self.fromToList = new Array("0","1","2", "3", "4", "5", "6", "7", "8", "9");
 	
 	self.tasksStatic = ko.observableArray([
