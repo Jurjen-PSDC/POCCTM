@@ -84,8 +84,7 @@ function CanvasState(canvas) {
   canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
   // Up, down, and move are for dragging
   canvas.addEventListener('mousedown', function(e) {
-    logmsg(" Mouse downs ");
-	var mouse = myState.getMouse(e);
+    var mouse = myState.getMouse(e);
     var mx = mouse.x;
     var my = mouse.y;
     var shapes = myState.shapes;
@@ -97,7 +96,9 @@ function CanvasState(canvas) {
         // so we can move it smoothly (see mousemove)
         myState.dragoffx = mx - mySel.x;
         myState.dragoffy = my - mySel.y;
-        myState.dragging = true;
+		logmsg(" Mouse down on " + myState.dragoffx + " - " + myState.dragoffy);
+	
+		myState.dragging = true;
         myState.selection = mySel;
         myState.valid = false;
         return;
