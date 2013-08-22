@@ -151,7 +151,9 @@ function CanvasState(canvas) {
     var l = shapes.length;
     for (var i = l-1; i >= 0; i--) {
       if (shapes[i].contains(mx, my)) {
-        var mySel = shapes[i];
+		logmsg("touched object found at " + mx + " - " + my);
+	
+		var mySel = shapes[i];
         // Keep track of where in the object we clicked
         // so we can move it smoothly (see mousemove)
         myState.dragoffx = mx - mySel.x;
