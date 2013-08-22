@@ -158,6 +158,11 @@ function CanvasState(canvas) {
 		return;
       }
     }
+	
+	if (myState.selection) {
+      myState.selection = null;
+      myState.valid = false; // Need to clear the old selection border
+    }
 	});
   
   canvas.addEventListener('touchmove', function(event) {
