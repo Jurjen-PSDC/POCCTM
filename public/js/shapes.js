@@ -150,11 +150,11 @@ function CanvasState(canvas) {
         myState.dragging = true;
         myState.selection = mySel;
         myState.valid = false;
-        return;
+		logmsg("touch start at " + myState.dragoffx + " - " + myState.dragoffy);
+		return;
       }
     }
-	logmsg("touch start at " + myState.dragoffx + " - " + myState.dragoffy);
-  });
+	});
   
   canvas.addEventListener('touchmove', function(event) {
 	  if (myState.dragging){
