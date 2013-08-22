@@ -20,6 +20,11 @@ function Shape(x, y, w, h, fill) {
   this.fill = fill || '#AAAAAA';
 }
 
+function logmsg(msg){
+	//alert(msg);
+	$('div.logmsg').html(msg + "<br>");
+}
+
 // Draws this shape to a given context
 Shape.prototype.draw = function(ctx) {
   ctx.fillStyle = this.fill;
@@ -79,7 +84,8 @@ function CanvasState(canvas) {
   canvas.addEventListener('selectstart', function(e) { e.preventDefault(); return false; }, false);
   // Up, down, and move are for dragging
   canvas.addEventListener('mousedown', function(e) {
-    var mouse = myState.getMouse(e);
+    logmsg(" Mouse downs ");
+	var mouse = myState.getMouse(e);
     var mx = mouse.x;
     var my = mouse.y;
     var shapes = myState.shapes;
@@ -109,10 +115,12 @@ function CanvasState(canvas) {
       var mouse = myState.getMouse(e);
       // We don't want to drag the object by its top-left corner, we want to drag it
       // from where we clicked. Thats why we saved the offset and use it here
-      myState.selection.x = mouse.x - myState.dragoffx;
+	  myState.selection.x = mouse.x - myState.dragoffx;
       myState.selection.y = mouse.y - myState.dragoffy;   
       myState.valid = false; // Something's dragging so we must redraw
-    }
+	  logmsg("MOUSE MOVED TO " + myState.selection.x + " - " + myState.selection.y);
+      
+	}
   }, true);
   
   canvas.addEventListener('mouseup', function(e) {
@@ -121,12 +129,12 @@ function CanvasState(canvas) {
   
   // double click for making new shapes
   canvas.addEventListener('dblclick', function(e) {
+	logmsg(" DBL Clicked ");
     var mouse = myState.getMouse(e);
     myState.addShape(new Shape(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0,255,0,.6)'));
   }, true);
   
   canvas.addEventListener('touchstart', function(event) {
-	console.log(" TOUCH START");
 	var touch = event.targetTouches[0];
     var mx = touch.pageX;
     var my = touch.pageY;
@@ -145,6 +153,7 @@ function CanvasState(canvas) {
         return;
       }
     }
+	logmsg("touch start at " + myState.dragoffx + " - " + myState.dragoffy);
   });
   
   canvas.addEventListener('touchmove', function(event) {
@@ -155,7 +164,7 @@ function CanvasState(canvas) {
 		myState.selection.x = touch.pageX - myState.dragoffx;
         myState.selection.y = touch.pageY - myState.dragoffy;   
         myState.valid = false; // Something's dragging so we must redraw
-		console.log(" TOUCH MOved to " + myState.selection.x + " - " + myState.selection.y);	
+		logmsg(" TOUCH MOVED TO " + myState.selection.x + " - " + myState.selection.y);	
 		}
 	}, false);
   
