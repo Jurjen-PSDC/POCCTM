@@ -123,6 +123,18 @@ function CanvasState(canvas) {
     myState.addShape(new Shape(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0,255,0,.6)'));
   }, true);
   
+  canvas.addEventListener('touchmove', function(event) {
+	  if (myState.dragging){
+	    var touch = event.targetTouches[0];
+		// Place element where the finger is
+		
+		myState.selection.x = touch.pageX;
+        myState.selection.y = touch.pageY;   
+        myState.valid = false; // Something's dragging so we must redraw
+	  }
+	}, false);
+  
+  
   // **** Options! ****
   
   this.selectionColor = '#CC0000';
