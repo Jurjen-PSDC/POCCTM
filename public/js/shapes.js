@@ -136,10 +136,13 @@ function CanvasState(canvas) {
   }, true);
   
   canvas.addEventListener('touchstart', function(event) {
+	
 	var touch = event.targetTouches[0];
     var mx = touch.pageX;
     var my = touch.pageY;
-    var shapes = myState.shapes;
+    logmsg("touch at " + mx + " - " + my);
+	
+	var shapes = myState.shapes;
     var l = shapes.length;
     for (var i = l-1; i >= 0; i--) {
       if (shapes[i].contains(mx, my)) {
@@ -158,7 +161,9 @@ function CanvasState(canvas) {
 	});
   
   canvas.addEventListener('touchmove', function(event) {
-	  if (myState.dragging){
+	logmsg("touch move");
+		
+	if (myState.dragging){
 	    var touch = event.targetTouches[0];
 		// Place element where the finger is
 	
