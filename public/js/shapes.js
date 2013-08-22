@@ -128,6 +128,11 @@ function CanvasState(canvas) {
     myState.dragging = false;
   }, true);
   
+  canvas.addEventListener('touchend', function(e) {
+    myState.dragging = false;
+  }, true);
+  
+  
   // double click for making new shapes
   canvas.addEventListener('dblclick', function(e) {
 	logmsg(" DBL Clicked ");
@@ -171,7 +176,7 @@ function CanvasState(canvas) {
 	if (myState.dragging){
 	    var touch = event.targetTouches[0];
 		// Place element where the finger is
-	
+	 
 		myState.selection.x = touch.pageX - myState.dragoffx;
         myState.selection.y = touch.pageY - myState.dragoffy;   
         myState.valid = false; // Something's dragging so we must redraw
