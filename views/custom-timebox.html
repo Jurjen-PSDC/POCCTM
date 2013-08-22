@@ -1,85 +1,39 @@
 <!DOCTYPE html>
 <html>
   <head>
-	<title> CTM 2.0 Beta </title>
+	<title> CTM 2.0 Beta - Custom Time Box</title>
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8"/> 
 	<!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">	
 	<!-- TimeLine -->
 	<script type="text/javascript" src="timeline/timeline.js"></script>
+	
+	
 	<link rel="stylesheet" type="text/css" href="timeline/timeline.css">
 
 	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 	<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
 
+	<script type="text/javascript" src="js/shapes.js"></script>
 	
-	<script type="text/javascript">
-       
-        // Called when the Visualization API is loaded.
-        function drawVisualization(id) {
-            var data;
-			// Create a JSON data table
-            data = [
-               {
-                    'start': new Date(2013,7,24,16,10,45),
-                    'content': 'Taak'
-                }
-            ];
-
-            // specify options
-            var options = {
-                'width':  '300px',
-                'height': 'auto',
-                'editable': true,   // enable dragging and editing events
-                'style': 'box',
-				'showMajorLabels' : false,
-				'showMinorLabels' : true
-            };
-			
-			var timelines = Array();
-		
-			$("[id^=timelineRow]").each(function( index ) {
-				var timeline;
-				
-				//console.log("Index :" + index);
-				
-			    var rowPrioIndex = $(this).attr("id"); 
-				//console.log("rowPrioIndex :" + rowPrioIndex);
-				// Instantiate our timeline object.
-				timeline = new links.Timeline(document.getElementById(rowPrioIndex));
-
-				function onRangeChanged(properties) {
-					document.getElementById('info').innerHTML += 'rowPrioIndex :' + rowPrioIndex  + 'rangechanged ' +
-							properties.start + ' - ' + properties.end + '<br>';
-				}
-
-				// attach an event listener using the links events handler
-				links.events.addListener(timeline, 'rangechanged', onRangeChanged);
-
-				// Draw our timeline with the created data and options
-				timeline.draw(data, options);
-				
-				timelines.push(timeline);
-				
-			});
-			
-        }
-    </script>
 	
 	<script>
 	  jQuery(document).ready(function () {
-		drawVisualization(); 
+		
+		  $("[id^=canvasTimeBox]").each(function( index ) {
+				
+			var rowPrioIndex = $(this).attr("id"); 
+			var s = new CanvasState(document.getElementById(rowPrioIndex));
+			s.addShape(new Shape(40,40,50,50)); // The default is gray
+			s.addShape(new Shape(60,140,40,60, 'lightskyblue'));
+			  // Lets make some partially transparent
+			s.addShape(new Shape(80,150,60,30, 'rgba(127, 255, 212, .5)'));
+			s.addShape(new Shape(125,80,30,80, 'rgba(245, 222, 179, .7)'));
+		});
 	});
   </script>
-	
-	
-	
-	
-	
-	
-	
-</head>
+ </head>
 <body>
 
 <!-- NAVIGATION -->
@@ -89,7 +43,7 @@
     <a class="brand" href="#">CTM 2.0 BETA</a>
     <ul class="nav">
       <li class="active"><a href="/">Home</a></li>
-      <li><a href="custom-timebox">Custom Timebox</a></li>
+      <li><a href="/custom-timebox">Custom Time Box</a></li>
     </ul>
   </div>
 </div>
@@ -112,19 +66,18 @@
 
  <!-- MAIN APP SPACE -->
 <div class="span10">
+	<p> <canvas id="canvas1"></canvas></p>
 	<table class="table table-striped">
 		<caption>Tasks</caption>
 		<thead><tr><th>Name</th><!--  <th>GroupId</th> <th>Customer</th><th>Project</th> --><th>Assigned to</th><th>Completed</th><th>Supply Moment</th></tr></thead>
 		<tbody data-bind="foreach:tasksStatic">
 			<tr>
 				<td data-bind="text:name"></td>
-				<!-- <td data-bind="text:groupId"></td>
-				<td data-bind="text:customerId"></td>
-				<td data-bind="text:projectId"></td>
-				 -->
 				<td data-bind="text:assignedTo"></td>
 				<td data-bind="text:completed"></td>
-				<td> <div data-bind="attr: { id: 'timelineRow'+priority}"> </div></td>
+				<td> <div data-bind="attr: { id: 'timelineRow'+priority}"> 
+				<canvas data-bind="attr: { id: 'canvasTimeBox'+priority}" width="200" height="100" style="border:1px solid #000000;"></canvas>
+				</div></td>
 			</tr>     
 		</tbody>
 		

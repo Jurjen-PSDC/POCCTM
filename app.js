@@ -44,9 +44,9 @@ app.get('/', function (req, res)
     res.render('index.html');
 }); 
 
-app.get('/test', function (req, res)
+app.get('/custom-timebox', function (req, res)
 {
-    res.render('test.html');
+    res.render('custom-timebox.html');
 }); 
  
 app.get('/alltasks', tasksList.showTasks.bind(tasksList));

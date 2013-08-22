@@ -15,8 +15,6 @@ function TaskModel(name, groupId, projectId, customerId,  taskId, priority, supp
 	
 }
 
-
-
 function TaskListViewModel() {
     // Data
     var self = this;
