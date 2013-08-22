@@ -114,24 +114,49 @@ function CanvasState(canvas) {
       myState.valid = false; // Something's dragging so we must redraw
     }
   }, true);
+  
   canvas.addEventListener('mouseup', function(e) {
     myState.dragging = false;
   }, true);
+  
   // double click for making new shapes
   canvas.addEventListener('dblclick', function(e) {
     var mouse = myState.getMouse(e);
     myState.addShape(new Shape(mouse.x - 10, mouse.y - 10, 20, 20, 'rgba(0,255,0,.6)'));
   }, true);
   
+  canvas.addEventListener('touchstart', function(event) {
+	console.log(" TOUCH START");
+	var touch = event.targetTouches[0];
+    var mx = touch.pageX;
+    var my = touch.pageY;
+    var shapes = myState.shapes;
+    var l = shapes.length;
+    for (var i = l-1; i >= 0; i--) {
+      if (shapes[i].contains(mx, my)) {
+        var mySel = shapes[i];
+        // Keep track of where in the object we clicked
+        // so we can move it smoothly (see mousemove)
+        myState.dragoffx = mx - mySel.x;
+        myState.dragoffy = my - mySel.y;
+        myState.dragging = true;
+        myState.selection = mySel;
+        myState.valid = false;
+        return;
+      }
+    }
+  });
+  
   canvas.addEventListener('touchmove', function(event) {
 	  if (myState.dragging){
 	    var touch = event.targetTouches[0];
 		// Place element where the finger is
-		
-		myState.selection.x = touch.pageX;
-        myState.selection.y = touch.pageY;   
+	
+		myState.selection.x = touch.pageX - myState.dragoffx;
+        myState.selection.y = touch.pageY - myState.dragoffy;   
         myState.valid = false; // Something's dragging so we must redraw
-	  }
+		console.log(" TOUCH MOved to " + myState.selection.x + " - " + myState.selection.y);	
+		}
 	}, false);
   
   
