@@ -155,7 +155,7 @@ function CanvasState(canvas) {
 	
 		var mySel = shapes[i];
         // Keep track of where in the object we clicked
-        // so we can move it smoothly (see mousemove)
+        // so we can move it smoothly 
         myState.dragoffx = mx - mySel.x;
         myState.dragoffy = my - mySel.y;
         myState.dragging = true;

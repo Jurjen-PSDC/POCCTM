@@ -9,33 +9,29 @@
 	<!-- TimeLine -->
 	<script type="text/javascript" src="timeline/timeline.js"></script>
 	
-	<link rel="stylesheet" href="css/boxes.css">
-
 	
 	<link rel="stylesheet" type="text/css" href="timeline/timeline.css">
 
 	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 	<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
-	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+
+	<script type="text/javascript" src="js/shapes.js"></script>
 	
 	
 	<script>
 	  jQuery(document).ready(function () {
 		
-		  $("[id^=task-box]").each(function( index ) {
-			var rowPrioIndex = $(this).attr("id"); 
-			console.log("now for " +rowPrioIndex );
-			var taskBox = document.getElementById(rowPrioIndex);
-			$(taskBox).draggable({ 
-			axis: "x", 
-			containment: "parent",
-			drag: function(){
-				var offset = $(taskBox).offset();
-				var xPos = offset.left;
-					$(taskBox).find('span').text("x: " + xPos);
-				}
-			});
 			
+		  	
+		  $("[id^=canvasTimeBox]").each(function( index ) {
+				
+			var rowPrioIndex = $(this).attr("id"); 
+			var s = new CanvasState(document.getElementById(rowPrioIndex));
+			s.addShape(new Shape(40,40,50,50)); // The default is gray
+			s.addShape(new Shape(60,140,40,60, 'lightskyblue'));
+			  // Lets make some partially transparent
+			s.addShape(new Shape(80,150,60,30, 'rgba(127, 255, 212, .5)'));
+			s.addShape(new Shape(125,80,30,80, 'rgba(245, 222, 179, .7)'));
 		});
 	});
   </script>
@@ -73,22 +69,17 @@
  <!-- MAIN APP SPACE -->
 <div class="span10">
 	<p> <div class="logmsg"></div></p>
-	<table class="table table-striped table-condensed">
+	<table class="table table-striped">
 		<caption>Tasks</caption>
-		<thead><tr><th width="100">Name</th><th width="100">Assigned to</th><th width="100">Completed</th><th>Supply Moment</th></tr></thead>
+		<thead><tr><th>Name</th><!--  <th>GroupId</th> <th>Customer</th><th>Project</th> --><th>Assigned to</th><th>Completed</th><th>Supply Moment</th></tr></thead>
 		<tbody data-bind="foreach:tasksStatic">
 			<tr>
 				<td data-bind="text:name"></td>
 				<td data-bind="text:assignedTo"></td>
 				<td data-bind="text:completed"></td>
 				<td> <div data-bind="attr: { id: 'timelineRow'+priority}"> 
-				</div>
-				<div class="time-line-box">This is content in a box 
-					<div data-bind="attr: { id: 'task-box-'+priority}" class="task-box">Task : 
-						<span></span>
-					</div>
-				</div>
-				</td>
+				<canvas data-bind="attr: { id: 'canvasTimeBox'+priority}" width="200" height="100" style="border:1px solid #000000;"></canvas>
+				</div></td>
 			</tr>     
 		</tbody>
 		
