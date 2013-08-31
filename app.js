@@ -37,19 +37,20 @@ var tasks = new Tasks(
     azure.createTableService(accountName, accountKey)
     , tableName
     , partitionKey);
+
 var tasksList = new TasksList(tasks);
 
 app.get('/', function (req, res)
 {
     res.render('index.html');
 }); 
-
 app.get('/custom-timebox', function (req, res)
 {
     res.render('custom-timebox.html');
 }); 
- 
 app.get('/alltasks', tasksList.showTasks.bind(tasksList));
-app.post('/addtask', tasksList.addTask.bind(tasksList));
- 
+app.get('/removetasks', tasksList.removeAllTasks.bind(tasksList));
+
+
+
 app.listen(process.env.port || 1337);

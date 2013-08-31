@@ -17,8 +17,28 @@
 	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 	<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
 	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
-	<script src="js/jquery.ui.touch-punch.min.js"></script>
 	
+	
+	<script>
+	  jQuery(document).ready(function () {
+		
+		  $("[id^=task-box]").each(function( index ) {
+			var rowPrioIndex = $(this).attr("id"); 
+			console.log("now for " +rowPrioIndex );
+			var taskBox = document.getElementById(rowPrioIndex);
+			$(taskBox).draggable({ 
+			axis: "x", 
+			containment: "parent",
+			drag: function(){
+				var offset = $(taskBox).offset();
+				var xPos = offset.left;
+					$(taskBox).find('span').text("x: " + xPos);
+				}
+			});
+			
+		});
+	});
+  </script>
  </head>
 <body>
 
@@ -48,12 +68,14 @@
 		<thead><tr><th width="75px">Name</th><th width="50px">Assigned to</th><th width="50px">Completed</th><th>Supply Moment</th></tr></thead>
 		<tbody data-bind="foreach:tasks">
 			<tr>
-				<td data-bind="text:Name"></td>
-				<td data-bind="text:AssignedTo"></td>
-				<td data-bind="text:PercCompleted"></td>
-				<td> <div data-bind="attr: { id: 'timelineRow'+Priority}"> 
-					<div class="time-line-box"> 
-						<div data-bind="attr: { id: 'task-box'+Priority}, draggableItem:{}" class="task-box"><span></span></div>
+				<td data-bind="text:name"></td>
+				<td data-bind="text:assignedTo"></td>
+				<td data-bind="text:completed"></td>
+				<td> <div data-bind="attr: { id: 'timelineRow'+priority}"> 
+				</div>
+				<div class="time-line-box">This is content in a box 
+					<div data-bind="attr: { id: 'task-box-'+priority}" class="task-box">Task : 
+						<span></span>
 					</div>
 				</div>
 				</td>
@@ -68,12 +90,4 @@
 <!-- END MAIN CONTENT --> 
 </body>
 <script type="text/javaScript" src="komodels/taskmodel.js"></script> 
-	<script>
-	  $(document).ready(function () {
-		 
-		ko.applyBindings(new TaskListViewModel());
-		console.log("Done loading tasklistviewmodel");		
-	});
-</script>
-
 </html>

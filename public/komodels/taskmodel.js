@@ -11,9 +11,22 @@ function TaskModel(name, groupId, projectId, customerId,  taskId, priority, supp
 	self.assignedTo = assignedTo;
 	self.reasonForDelay = "";
 	
-	
-	
 }
+
+ko.bindingHandlers.draggableItem = {
+	init: function (element){
+			$(element).draggable({ 
+			axis: "x", 
+			containment: "parent",
+			drag: function(){
+				var offset = $(element).offset();
+				var xPos = offset.left;
+				$(element).find('span').text("x: " + xPos);
+			}
+		});
+	}
+}
+
 
 function TaskListViewModel() {
     // Data
@@ -86,13 +99,12 @@ function TaskListViewModel() {
     self.removeTask = function(task) { self.tasks.remove(task) };
 	
 	self.loadTasks = function(){
-		  $.get("/alltasks", {}, function(data){ 
+		  $.getJSON("/alltasks", function(data){ 
 			for (var i = 0; i < data.tasks.length; i++) {
-				 self.tasks.push( new TaskModel(data.tasks[i].name , data.tasks[i].active));
+				 self.tasks.push(data.tasks[i]);
 			}});
 		
 	}; 
 	self.loadTasks();
 }
 
-ko.applyBindings(new TaskListViewModel());
