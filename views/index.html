@@ -12,84 +12,16 @@
 
 	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
 	<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
-
-	
-	<script type="text/javascript">
-       
-        // Called when the Visualization API is loaded.
-        function drawVisualization(id) {
-            var data;
-			// Create a JSON data table
-            data = [
-               {
-                    'start': new Date(2013,7,24,16,10,45),
-                    'content': 'Taak'
-                }
-            ];
-
-            // specify options
-            var options = {
-                'width':  '300px',
-                'height': 'auto',
-                'editable': true,   // enable dragging and editing events
-                'style': 'box',
-				'showMajorLabels' : false,
-				'showMinorLabels' : true
-            };
-			
-			var timelines = Array();
-		
-			$("[id^=timelineRow]").each(function( index ) {
-				var timeline;
-				
-				//console.log("Index :" + index);
-				
-			    var rowPrioIndex = $(this).attr("id"); 
-				//console.log("rowPrioIndex :" + rowPrioIndex);
-				// Instantiate our timeline object.
-				timeline = new links.Timeline(document.getElementById(rowPrioIndex));
-
-				function onRangeChanged(properties) {
-					document.getElementById('info').innerHTML += 'rowPrioIndex :' + rowPrioIndex  + 'rangechanged ' +
-							properties.start + ' - ' + properties.end + '<br>';
-				}
-
-				// attach an event listener using the links events handler
-				links.events.addListener(timeline, 'rangechanged', onRangeChanged);
-
-				// Draw our timeline with the created data and options
-				timeline.draw(data, options);
-				
-				timelines.push(timeline);
-				
-			});
-			
-        }
-    </script>
-	
-	<script>
-	  jQuery(document).ready(function () {
-		drawVisualization(); 
-	});
-  </script>
-	
-	
-	
-	
-	
-	
-	
 </head>
 <body>
 
 <!-- NAVIGATION -->
-      
 <div class="navbar">
   <div class="navbar-inner">
     <a class="brand" href="#">CTM 2.0 BETA</a>
     <ul class="nav">
       <li class="active"><a href="/">Home</a></li>
-      <li><a href="custom-timebox">Custom Timebox</a></li>
+      <li><a href="timebox">Timebox</a></li>
     </ul>
   </div>
 </div>
@@ -97,20 +29,7 @@
 <!-- MAIN CONTENT -->
 <div class="row-fluid">
 
-<!-- SUB NAV LEFT -->
-	<div class="span2">
-		<ul class="nav nav-list">
-			<li class="nav-header">Werkmomenten</li>
-			<li class="active"><a href="#">Top 20</a></li>
-			<li><a href="#">Bewerken</a></li>
-			<li class="nav-header">Daily standup A1</li>
-			<li class="nav-header">Etc.</li>
-			<li class="nav-header">Voeg toe</li>
-		</ul>
-	</div>
-<!-- END SUB NAV LEFT -->
-
- <!-- MAIN APP SPACE -->
+<!-- MAIN APP SPACE -->
 <div class="span10">
 	<table class="table table-striped">
 		<caption>Tasks</caption>
@@ -120,10 +39,11 @@
 				<td data-bind="text:Name"></td>
 				<td data-bind="text:AssignedTo"></td>
 				<td data-bind="text:PercCompleted"></td>
-				<td> <div data-bind="attr: { id: 'timelineRow'+Priority}"> </div></td>
+				<td>
+					<div data-bind="attr:{id: 'timelineRow-'+Priority}, timelineBox:$data"> </div>
+				</td>
 			</tr>     
 		</tbody>
-		
 	</table>
 	<div id="info"></div>
  </div>
@@ -132,4 +52,53 @@
 <!-- END MAIN CONTENT --> 
 </body>
 <script type="text/javaScript" src="komodels/taskmodel.js"></script> 
+	<script>
+
+	  $(document).ready(function () {
+		ko.bindingHandlers.timelineBox = {
+			init: function(element, accessor){
+				
+				var taskModel = accessor();
+				// Create the JSON data table
+				var data = [
+				   {
+						'start': new Date(taskModel.CompletionDate),
+						'content': "Taak"
+					}
+				];
+
+				// specify options
+				var options = {
+					'width':  'auto',
+					'height': 'auto',
+					'editable': true,   // enable dragging and editing events
+					'style': 'box',
+					'showMajorLabels' : false,
+					'showMinorLabels' : true
+				};
+				
+			
+				var timeline = new links.Timeline(element);
+				
+				function onRangeChanged(properties) {
+					document.getElementById('info').innerHTML += 'rowPrioIndex :' + taskModel  + 'rangechanged ' +
+						properties.start + ' - ' + properties.end + '<br>';
+				}
+
+	
+				// attach an event listener using the links events handler
+				links.events.addListener(timeline, 'rangechanged', onRangeChanged);
+
+				// Draw our timeline with the created data and options
+				timeline.draw(data, options);
+				
+			}
+		}		
+
+		
+			ko.applyBindings(new TaskListViewModel());
+			console.log("Done loading tasklistviewmodel");		
+		
+		});
+</script>
 </html>
