@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title> CTM 2.0 Beta - Custom Time Box</title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta charset="utf-8"/> 
+	<!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">	
+	<!-- TimeLine -->
+	<script src="js/moment.js"></script>
+	<script type="text/javascript" src="timeline/timeline.js"></script>
+	<link rel="stylesheet" href="css/boxes.css">
+	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
+	<script src="js/jquery.ui.touch-punch.min.js"></script>
+	
+	
+ </head>
+<body>
+
+<!-- NAVIGATION -->
+      
+<div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="#">CTM 2.0 BETA</a>
+    <ul class="nav">
+      <li class="active"><a href="/">Home</a></li>
+      <li><a href="/timebox">Custom Time Box</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="row-fluid">
+
+<!-- SUB NAV LEFT -->
+
+<!-- END SUB NAV LEFT -->
+
+ <!-- MAIN APP SPACE -->
+<div class="span12">
+	<div class="time-line-header-container">
+		<div class="time-line-header"></div> 
+	</div>	
+	
+	<div class="time-line-box-container">
+		<div class="time-line-box"></div>
+	</div>
+
+	<div id="info"></div>
+ </div>
+<!-- END MAIN APP SPACE -->
+</div>
+<!-- END MAIN CONTENT --> 
+</body>
+<script type="text/javaScript" src="komodels/taskmodel.js"></script> 
+	<script>
+		
+	var TimeBoxes = new Array();
+	var hourWidth;
+	var taskBoxBaseHeigth;
+	var timelineviewMin = 2;
+	var timelineviewMax = 10;
+	
+	$(document).ready(function () {
+		 
+		var hourWidth = Math.round($(window).width()-20);
+		
+		
+		
+		
+		CreateTimeBoxes();
+		
+		SetTimeLineHeader()  
+		  
+		DrawTimeBoxes();
+		
+		$(window).resize(function() {
+				SetTimeLineHeader();
+				DrawTimeBoxes();
+		});
+		
+	});
+		
+	function SetDraggable(item){
+		var index = item.attr("id");
+		console.log("Setting draggable:" + index);
+		item.draggable({ 
+		axis: "x", 
+		containment: "parent",
+		drag: function(){
+			//var offset = $(this).offset();
+			//var xPos = offset.left - 21	;
+			//$(".posX").text("x: " + xPos);
+		 }
+		});
+	}
+
+		
+		
+		function SetTimeLineHeader(){
+			maxHours = GetMaxHours();
+				
+			$(".time-line-header").empty();	
+				
+			hourWidth = Math.round($(".time-line-header").width()/maxHours);
+			for (var i=0;i<maxHours-1;i++)
+			{
+			  $('<div/>', {
+							'class':'hour-box',
+							'width':hourWidth}).appendTo('.time-line-header');
+			}
+		}
+		
+		function DateDiff(max, min){
+			var diff = Math.abs(max - min)/ 3600000;
+			return diff;
+		}
+		
+		
+		function DrawTimeBoxes(){
+			$(".time-line-box").empty();	
+		
+			for(var i=0; i< TimeBoxes.length; i++){
+				
+				var time = TimeBoxes[i];
+				var start = time["start"];
+				var end = time["end"];
+				
+				var taskLength = DateDiff(end, start);
+				var nrHoursFromFirstTask = DateDiff(start,TimeBoxes[0].start);
+				var hourOfStartTimeLine = new Date(TimeBoxes[0].start).getHours() - timelineviewMin;
+				
+				var taskBoxWidth = taskLength * hourWidth;
+				var taskBoxLeftPos = (new Date(TimeBoxes[i].start).getHours() - hourOfStartTimeLine)* hourWidth;
+				
+				console.log(" nr from start :" + hourOfStartTimeLine);
+				$('<div/>', 
+							{
+								'id': "task-box-"+i ,
+								'class':'task-box', 
+								'width': taskBoxWidth
+							}).appendTo('.time-line-box').css("left",taskBoxLeftPos );
+							
+				$('#task-box-'+i).click(function(){
+					SetDraggable($(this));
+					});
+			}
+			// Get the heigth of a task box
+			taskBoxBaseHeigth = $(".task-box").height();
+			var newH = taskBoxBaseHeigth*(TimeBoxes.length);
+			$(".time-line-box").height(newH); 			
+		}
+		
+		function CreateTimeBoxes(){
+			
+			TimeBoxes.push(
+						{
+							"start" : new Date(2013, 5, 6, 10, 0, 0 ).getTime(),
+							"end" : new Date(2013, 5, 6, 11, 0, 0 ).getTime()	
+						});
+			
+			
+			TimeBoxes.push(
+						{
+							"start" : new Date(2013, 5, 6, 11, 0, 0 ).getTime(),
+							"end" : new Date(2013, 5, 6, 14, 0, 0 ).getTime()	
+						});
+			
+			
+		}
+		
+		
+		function GetMaxHours(){
+			return timelineviewMin + timelineviewMax;
+		}
+</script>
+
+</html>

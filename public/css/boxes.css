@@ -1,12 +1,33 @@
+.time-line-header-container, .time-line-box-container {
+	padding-left: 30px;
+	padding-right: 30px;
+	
+}
+
+.time-line-header{
+	border: 1px solid #ccc;
+    width: auto;
+	height: 40px;
+	padding-bottom:15px;
+}
+
+
 .time-line-box {
 	border: 1px solid #ccc;
     width: auto;
-	height: 100px;
+	height: auto;
 }
 
 .task-box{
 	border: 1px solid red;
 	border-radius: 1em 1em 1em 1em;
-	width: 50px;
-	height: 50px;
+	width: 60px;
+	height: 60px;
+	position: relative;
+}
+
+.hour-box{
+	border: 1px solid #ccc;
+	float:left;
+	height: 40px;
 }

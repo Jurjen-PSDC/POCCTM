@@ -40,17 +40,17 @@ var tasks = new Tasks(
 
 var tasksList = new TasksList(tasks);
 
+tasks.addMockTasks();
+
 app.get('/', function (req, res)
 {
     res.render('index.html');
 }); 
-app.get('/custom-timebox', function (req, res)
+app.get('/timebox', function (req, res)
 {
-    res.render('custom-timebox.html');
+    res.render('timebox.html');
 }); 
 app.get('/alltasks', tasksList.showTasks.bind(tasksList));
 app.get('/removetasks', tasksList.removeAllTasks.bind(tasksList));
-
-
 
 app.listen(process.env.port || 1337);
