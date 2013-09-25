@@ -1,0 +1,66 @@
+var initialData = [
+    { ProjectName: "Cleaning the kitchen", StartMoment: new Date(2013, 8, 1, 12, 0, 0 ),EndMoment: new Date(2013, 8, 5, 12, 0, 0 ), Tasks: [
+        { TaskName: "Cooking", StartMoment: new Date(2013, 8, 1, 12, 0 , 0 ), EndMoment: new Date(2013, 8, 1, 14, 0, 0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" },
+		{ TaskName: "Dishes", StartMoment: new Date(2013, 8, 5, 9, 0, 0 ), EndMoment: new Date(2013, 8, 5, 12, 0,0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" }
+        ]
+    },
+    { ProjectName: "Working", StartMoment: new Date(2013, 8, 1),EndMoment: new Date(2013, 8, 1), Tasks: [
+        { TaskName: "Woningnet", StartMoment: new Date(2013, 8, 1), EndMoment: new Date(2013, 8, 1), TeamName: "TeamName B", AssignedTo: "Jurjen" },
+		{ TaskName: "CTM", StartMoment: new Date(2013, 8, 1), EndMoment: new Date(2013, 8, 1), TeamName: "TeamName B", AssignedTo: "Jurjen" }
+        ]
+    }
+];
+
+
+var koTaskModel =function (task){
+
+	var self = this;
+	
+	self.TaskName= task.TaskName;
+	self.StartMoment= ko.observable(new Date(task.StartMoment));
+	self.EndMoment= ko.observable(new Date(task.EndMoment));			
+	self.TeamName= task.TeamName;
+	self.AssignedTo=ko.observable(task.AssignedTo);		
+
+	
+}
+
+var koProjectModel = function(project){
+	var self = this;
+	
+	self.ProjectName = project.ProjectName, 
+	self.StartMoment = ko.observable(new Date(project.StartMoment)),
+	self.EndMoment = ko.observable(new Date(project.EndMoment)),
+	self.Tasks = ko.observableArray(
+			ko.utils.arrayMap(project.Tasks, function(task){
+				return new koTaskModel(task);
+			}));			
+
+}
+
+
+var koProjectsModel = function(projects) {
+    // Data
+    var self = this;
+	
+	self.projects = ko.observableArray(
+						ko.utils.arrayMap(projects, function(project) {
+							return new koProjectModel(project);
+						}));
+
+
+	self.save = function() {
+        //self.lastSavedJson(
+		//JSON.stringify(ko.toJS(self.projects), null, 2));
+		
+		var projTimes = "";
+		for(var p =0; p < self.projects().length; p++){
+			projTimes += self.projects()[p].StartMoment().toLocaleString() + " - " + self.projects()[p].EndMoment().toLocaleString()	
+		}
+
+		self.lastSavedJson(projTimes);	
+ };
+ 
+    self.lastSavedJson = ko.observable("")
+	
+};

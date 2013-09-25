@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<title> CTM 2.0 Beta </title>
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8"/> 
+	<!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">	
+	
+		<!-- TimeLine -->
+	<script type="text/javascript" src="timeline/timeline.js"></script>
+	<link rel="stylesheet" type="text/css" href="timeline/timeline.css">
+
+	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+	<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
+</head>
+<body>
+
+<!-- NAVIGATION -->
+<div class="navbar">
+  <div class="navbar-inner">
+    <a class="brand" href="#">CTM 2.0 BETA</a>
+    <ul class="nav">
+      <li class="active"><a href="/">Home</a></li>
+      <li><a href="timebox">Timebox</a></li>
+    </ul>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="row-fluid">
+
+<!-- MAIN APP SPACE -->
+<div class="span10">
+	<table class="table table-striped">
+		<caption>Tasks</caption>
+		<thead><tr><th>Name</th><th>T</th></tr></thead>
+		<tbody data-bind="foreach:projects">
+			<tr>
+				<td> <input data-bind="value:ProjectName"></td>
+				<td>	
+						<div data-bind="projectTimeLine:$data"> </div>
+				</td>
+					
+			</tr>
+			<!-- ko foreach: Tasks -->
+				<tr>
+					<td> <input data-bind="value:TaskName"></td>
+					<!---<td data-bind="text:EndDate"></td> -->
+					<td>	
+						<div data-bind="taskTimeLine:$data"> </div>
+					</td>
+					
+				</tr>
+			<!-- /ko -->
+			
+		</tbody>
+	</table>
+	<textarea data-bind='value: lastSavedJson' rows='5' cols='60' disabled='disabled'> </textarea>
+	<p>
+    <button data-bind='click: save, enable: projects().length > 0'>Save to JSON</button>
+</p>
+ </div>
+<!-- END MAIN APP SPACE -->
+</div>
+<!-- END MAIN CONTENT --> 
+</body>
+<script type="text/javaScript" src="komodels/koProjectmodel.js"></script> 
+
+	<script>
+
+	  $(document).ready(function () {
+		
+		ko.bindingHandlers.projectTimeLine = {
+			init: function(element, accessor){
+				
+				var projectModel = accessor();
+				// Create the JSON data table
+				var data = [
+					{
+						'start': new Date(projectModel.StartMoment()),
+						'end' : new Date(projectModel.EndMoment()),
+						'content' : "content",
+						'type' : "box"			
+					}
+				];
+
+				// specify options
+				var options = {
+					start : new Date(projectModel.StartMoment()),
+					end : new Date(projectModel.EndMoment()),
+					width:  "auto",
+					height: "auto",
+					editable: true,   // enable dragging and editing events
+					style: "box",
+					showMajorLabels : true,
+					showMinorLabels : true
+				};
+				
+			
+				var timeline = new links.Timeline(element);
+
+	
+				function onRangeChanged(properties) {
+						console.log(properties.start + " " + properties.end);
+						projectModel.StartMoment(properties.start);
+						projectModel.EndMoment(properties.end);
+				}
+
+				function onChanged(){
+					console.log(data[0].start.toLocaleString() + " " + data[0].end.toLocaleString());
+					projectModel.StartMoment(data[0].start);
+					projectModel.EndMoment(data[0].end);
+					
+				}
+	
+				// attach an event listener using the links events handler
+				links.events.addListener(timeline, 'rangechanged', onRangeChanged);
+			
+				links.events.addListener(timeline, 'change', onChanged);
+						
+			
+				// Draw our timeline with the created data and options
+				timeline.draw(data, options);
+				
+			}
+		}
+		
+		
+		ko.bindingHandlers.taskTimeLine = {
+			init: function(element, accessor){
+				
+				var taskModel = accessor();
+				var data = [
+					{
+						'start': new Date(taskModel.StartMoment()),
+						'end' : new Date(taskModel.EndMoment()),
+						'content' : "content",
+						'type' : "box"			
+					}
+				];
+
+				// specify options
+				var options = {
+					start : new Date(taskModel.StartMoment()),
+					end : new Date(taskModel.EndMoment()),
+					width:  "auto",
+					height: "auto",
+					editable: true,   // enable dragging and editing events
+					style: "box",
+					showMajorLabels : true,
+					showMinorLabels : true
+				};
+				
+			
+				var timeline = new links.Timeline(element);
+				
+				// Draw our timeline with the created data and options
+				timeline.draw(data, options);
+				
+			}
+		}		
+
+		ko.applyBindings(new koProjectsModel(initialData));
+
+		});
+</script>
+
+
+</html>
