@@ -4,9 +4,9 @@ var initialData = [
 		{ TaskName: "Dishes", StartMoment: new Date(2013, 8, 5, 9, 0, 0 ), EndMoment: new Date(2013, 8, 5, 12, 0,0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" }
         ]
     },
-    { ProjectName: "Working", StartMoment: new Date(2013, 8, 1),EndMoment: new Date(2013, 8, 1), Tasks: [
-        { TaskName: "Woningnet", StartMoment: new Date(2013, 8, 1), EndMoment: new Date(2013, 8, 1), TeamName: "TeamName B", AssignedTo: "Jurjen" },
-		{ TaskName: "CTM", StartMoment: new Date(2013, 8, 1), EndMoment: new Date(2013, 8, 1), TeamName: "TeamName B", AssignedTo: "Jurjen" }
+    { ProjectName: "Working", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ),EndMoment: new Date(2013, 8, 8, 16, 0, 0), Tasks: [
+        { TaskName: "Woningnet", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ), EndMoment: new Date(2013, 8, 6, 18, 0, 0 ), TeamName: "TeamName B", AssignedTo: "Jurjen" },
+		{ TaskName: "CTM", StartMoment: new Date(2013, 8, 8, 8, 0, 0), EndMoment: new Date(2013, 8, 8, 16, 0, 0), TeamName: "TeamName B", AssignedTo: "Jurjen" }
         ]
     }
 ];
@@ -59,8 +59,32 @@ var koProjectsModel = function(projects) {
 		}
 
 		self.lastSavedJson(projTimes);	
- };
- 
+	};
+	
+	self.firstStartDate = function(){
+		var startDate = new Date(self.projects()[0].StartMoment());
+		
+		for(var p =1; p < self.projects().length; p++){
+			if(+startDate >= +self.projects()[p].StartMoment()){
+				startDate = new Date(self.projects()[p].StartMoment());
+			} 
+		}
+		
+		return startDate;
+	};
+	
+	self.lastEndDate = function(){
+		var endDate = new Date(self.projects()[0].EndMoment());
+		
+		for(var p =1; p < self.projects().length; p++){
+			if(+endDate <= +self.projects()[p].EndMoment()){
+				endDate = new Date(self.projects()[p].EndMoment());
+			} 
+		}
+		
+		return endDate;
+	};
+	
     self.lastSavedJson = ko.observable("")
 	
 };

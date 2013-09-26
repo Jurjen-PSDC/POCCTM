@@ -34,7 +34,7 @@
 <div class="span10">
 	<table class="table table-striped">
 		<caption>Tasks</caption>
-		<thead><tr><th>Name</th><th>T</th></tr></thead>
+		<thead><tr><th>Name</th><th data-bind="headerTimeLine:$data">T</th></tr></thead>
 		<tbody data-bind="foreach:projects">
 			<tr>
 				<td> <input data-bind="value:ProjectName"></td>
@@ -69,6 +69,8 @@
 
 	<script>
 
+	
+	  var timeline_width = "600px";	
 	  var timelines = new Array();
 	  
 	  
@@ -87,6 +89,58 @@
 	  
 	  
 	  $(document).ready(function () {
+		
+		ko.bindingHandlers.headerTimeLine = {
+			init: function(element, accessor){
+				
+				var projectModel = accessor();
+				
+				var startDate = new Date(projectModel.firstStartDate());
+				var endDate = new Date(projectModel.lastEndDate());
+				
+				// Create the JSON data table
+				var data = [
+					{
+						'start': startDate,
+						'end' : endDate,
+						'content' : "alle projecten",
+						'type' : "box"			
+					}
+				];
+
+				
+				// specify options
+				var options = {
+					start : startDate,
+					end : endDate,
+					width:  timeline_width,
+					height: "auto",
+					editable: true,   // enable dragging and editing events
+					style: "box",
+					showMajorLabels : true,
+					showMinorLabels : true,
+					scale: links.Timeline.StepDate.SCALE.DAY,
+					step: 1
+				};
+				
+			
+				var timeline = new links.Timeline(element);
+
+	
+				function onRangeChanged(properties) {
+						updateRanges(properties.start, properties.end);
+				}
+
+					// attach an event listener using the links events handler
+				links.events.addListener(timeline, 'rangechange', onRangeChanged);
+			
+				timelines.push(timeline);
+				// Draw our timeline with the created data and options
+				timeline.draw(data, options);
+				
+			}
+		}
+		
 		
 		ko.bindingHandlers.projectTimeLine = {
 			init: function(element, accessor){
@@ -107,12 +161,14 @@
 				var options = {
 					start : new Date(projectModel.StartMoment()),
 					end : new Date(projectModel.EndMoment()),
-					width:  "auto",
+					width:  timeline_width,
 					height: "auto",
 					editable: true,   // enable dragging and editing events
 					style: "box",
 					showMajorLabels : true,
-					showMinorLabels : true
+					showMinorLabels : false,
+					scale: links.Timeline.StepDate.SCALE.DAY,
+					step: 1
 				};
 				
 			
@@ -120,9 +176,6 @@
 
 	
 				function onRangeChanged(properties) {
-						//console.log(properties.start + " " + properties.end);
-						//projectModel.StartMoment(properties.start);
-						//projectModel.EndMoment(properties.end);
 						updateRanges(properties.start, properties.end);
 				}
 
@@ -168,21 +221,20 @@
 				var options = {
 					start : new Date(parent.StartMoment()),
 					end : new Date(parent.EndMoment()),
-					width:  "auto",
+					width:  timeline_width,
 					height: "auto",
 					editable: true,   // enable dragging and editing events
 					style: "box",
-					showMajorLabels : true,
-					showMinorLabels : true
+					showMajorLabels : false,
+					showMinorLabels : true,
+					scale: links.Timeline.StepDate.SCALE.DAY,
+					step: 1
 				};
 				
 			
 				var timeline = new links.Timeline(element);
 				
 				function onRangeChanged(properties) {
-						//console.log(properties.start + " " + properties.end);
-						//projectModel.StartMoment(properties.start);
-						//projectModel.EndMoment(properties.end);
 						updateRanges(properties.start, properties.end);
 				}
 
