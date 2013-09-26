@@ -69,18 +69,36 @@
 
 	<script>
 
+	  var timelines = new Array();
+	  
+	  
+	  function updateRanges(start, end){
+		
+		//var range = timeline.getVisibleChartRange();
+		
+		for(var i = 0; i < timelines.length; i++){
+			
+			//if(timelines[i] != timeline){
+				timelines[i].setVisibleChartRange(start, end);
+			//}
+		} 
+	  
+	  }
+	  
+	  
 	  $(document).ready(function () {
 		
 		ko.bindingHandlers.projectTimeLine = {
 			init: function(element, accessor){
 				
 				var projectModel = accessor();
+				
 				// Create the JSON data table
 				var data = [
 					{
 						'start': new Date(projectModel.StartMoment()),
 						'end' : new Date(projectModel.EndMoment()),
-						'content' : "content",
+						'content' : "project",
 						'type' : "box"			
 					}
 				];
@@ -102,11 +120,15 @@
 
 	
 				function onRangeChanged(properties) {
-						console.log(properties.start + " " + properties.end);
-						projectModel.StartMoment(properties.start);
-						projectModel.EndMoment(properties.end);
+						//console.log(properties.start + " " + properties.end);
+						//projectModel.StartMoment(properties.start);
+						//projectModel.EndMoment(properties.end);
+						updateRanges(properties.start, properties.end);
 				}
 
+					// attach an event listener using the links events handler
+				links.events.addListener(timeline, 'rangechange', onRangeChanged);
+			
 				function onChanged(){
 					console.log(data[0].start.toLocaleString() + " " + data[0].end.toLocaleString());
 					projectModel.StartMoment(data[0].start);
@@ -114,12 +136,9 @@
 					
 				}
 	
-				// attach an event listener using the links events handler
-				links.events.addListener(timeline, 'rangechanged', onRangeChanged);
-			
 				links.events.addListener(timeline, 'change', onChanged);
 						
-			
+				timelines.push(timeline);
 				// Draw our timeline with the created data and options
 				timeline.draw(data, options);
 				
@@ -128,22 +147,27 @@
 		
 		
 		ko.bindingHandlers.taskTimeLine = {
-			init: function(element, accessor){
+			init: function(element, accessor, allBindingsAccessor, viewModel, bindingContext){
+				
 				
 				var taskModel = accessor();
+			
 				var data = [
 					{
 						'start': new Date(taskModel.StartMoment()),
 						'end' : new Date(taskModel.EndMoment()),
-						'content' : "content",
+						'content' : "taak",
 						'type' : "box"			
 					}
 				];
 
+				
+				var parent = bindingContext.$parent;
+				
 				// specify options
 				var options = {
-					start : new Date(taskModel.StartMoment()),
-					end : new Date(taskModel.EndMoment()),
+					start : new Date(parent.StartMoment()),
+					end : new Date(parent.EndMoment()),
 					width:  "auto",
 					height: "auto",
 					editable: true,   // enable dragging and editing events
@@ -155,6 +179,18 @@
 			
 				var timeline = new links.Timeline(element);
 				
+				function onRangeChanged(properties) {
+						//console.log(properties.start + " " + properties.end);
+						//projectModel.StartMoment(properties.start);
+						//projectModel.EndMoment(properties.end);
+						updateRanges(properties.start, properties.end);
+				}
+
+					// attach an event listener using the links events handler
+				links.events.addListener(timeline, 'rangechange', onRangeChanged);
+			
+				
+				timelines.push(timeline);
 				// Draw our timeline with the created data and options
 				timeline.draw(data, options);
 				
