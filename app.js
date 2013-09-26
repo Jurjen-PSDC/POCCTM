@@ -44,12 +44,9 @@ tasks.addMockTasks();
 
 app.get('/', function (req, res)
 {
-    res.render('index.html');
+    res.render('projects.html');
 }); 
-app.get('/timebox', function (req, res)
-{
-    res.render('timebox.html');
-}); 
+ 
 app.get('/alltasks', tasksList.showTasks.bind(tasksList));
 app.get('/removetasks', tasksList.removeAllTasks.bind(tasksList));
 

@@ -1,12 +1,12 @@
 var initialData = [
-    { ProjectName: "Cleaning the kitchen", StartMoment: new Date(2013, 8, 1, 12, 0, 0 ),EndMoment: new Date(2013, 8, 5, 12, 0, 0 ), Tasks: [
-        { TaskName: "Cooking", StartMoment: new Date(2013, 8, 1, 12, 0 , 0 ), EndMoment: new Date(2013, 8, 1, 14, 0, 0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" },
-		{ TaskName: "Dishes", StartMoment: new Date(2013, 8, 5, 9, 0, 0 ), EndMoment: new Date(2013, 8, 5, 12, 0,0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" }
+    { ProjectName: "Project 1", StartMoment: new Date(2013, 8, 1, 12, 0, 0 ),EndMoment: new Date(2013, 8, 5, 12, 0, 0 ), Tasks: [
+        { TaskName: "Taak 1", StartMoment: new Date(2013, 8, 1, 12, 0 , 0 ), EndMoment: new Date(2013, 8, 1, 14, 0, 0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" },
+		{ TaskName: "Taak 2", StartMoment: new Date(2013, 8, 5, 9, 0, 0 ), EndMoment: new Date(2013, 8, 5, 12, 0,0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" }
         ]
     },
-    { ProjectName: "Working", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ),EndMoment: new Date(2013, 8, 8, 16, 0, 0), Tasks: [
-        { TaskName: "Woningnet", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ), EndMoment: new Date(2013, 8, 6, 18, 0, 0 ), TeamName: "TeamName B", AssignedTo: "Jurjen" },
-		{ TaskName: "CTM", StartMoment: new Date(2013, 8, 8, 8, 0, 0), EndMoment: new Date(2013, 8, 8, 16, 0, 0), TeamName: "TeamName B", AssignedTo: "Jurjen" }
+    { ProjectName: "Project 2", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ),EndMoment: new Date(2013, 8, 8, 16, 0, 0), Tasks: [
+        { TaskName: "Taak A", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ), EndMoment: new Date(2013, 8, 6, 18, 0, 0 ), TeamName: "TeamName B", AssignedTo: "Jurjen" },
+		{ TaskName: "Taak B", StartMoment: new Date(2013, 8, 8, 8, 0, 0), EndMoment: new Date(2013, 8, 8, 16, 0, 0), TeamName: "TeamName B", AssignedTo: "Jurjen" }
         ]
     }
 ];
@@ -50,15 +50,15 @@ var koProjectsModel = function(projects) {
 
 
 	self.save = function() {
-        //self.lastSavedJson(
-		//JSON.stringify(ko.toJS(self.projects), null, 2));
+        self.lastSavedJson(
+		JSON.stringify(ko.toJS(self.projects), null, 2));
 		
-		var projTimes = "";
-		for(var p =0; p < self.projects().length; p++){
-			projTimes += self.projects()[p].StartMoment().toLocaleString() + " - " + self.projects()[p].EndMoment().toLocaleString()	
-		}
+		//var projTimes = "";
+		//for(var p =0; p < self.projects().length; p++){
+		//	projTimes += self.projects()[p].StartMoment().toLocaleString() + " - " + self.projects()[p].EndMoment().toLocaleString()	
+		//}
 
-		self.lastSavedJson(projTimes);	
+		//self.lastSavedJson(projTimes);	
 	};
 	
 	self.firstStartDate = function(){

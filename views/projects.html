@@ -22,8 +22,7 @@
     <a class="brand" href="#">CTM 2.0 BETA</a>
     <ul class="nav">
       <li class="active"><a href="/">Home</a></li>
-      <li><a href="timebox">Timebox</a></li>
-    </ul>
+     </ul>
   </div>
 </div>
 
@@ -56,7 +55,7 @@
 			
 		</tbody>
 	</table>
-	<textarea data-bind='value: lastSavedJson' rows='5' cols='60' disabled='disabled'> </textarea>
+	<textarea data-bind='value: lastSavedJson' rows='10' cols='500' disabled='disabled'> </textarea>
 	<p>
     <button data-bind='click: save, enable: projects().length > 0'>Save to JSON</button>
 </p>
@@ -240,6 +239,15 @@
 
 					// attach an event listener using the links events handler
 				links.events.addListener(timeline, 'rangechange', onRangeChanged);
+			
+				function onChanged(){
+					console.log(data[0].start.toLocaleString() + " " + data[0].end.toLocaleString());
+					taskModel.StartMoment(data[0].start);
+					taskModel.EndMoment(data[0].end);
+					
+				}
+	
+				links.events.addListener(timeline, 'change', onChanged);
 			
 				
 				timelines.push(timeline);
