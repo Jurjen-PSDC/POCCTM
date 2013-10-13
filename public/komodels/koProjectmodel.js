@@ -16,6 +16,177 @@ ko.extenders.date = function(target, format) {
 };
 
 
+ko.bindingHandlers.headerTimeLine = {
+	init: function(element, accessor){
+				
+		var projectModel = accessor();
+		var startDate = new Date(projectModel.firstStartDate());
+		var endDate = new Date(projectModel.lastEndDate());
+				
+		// Create the JSON data table
+		var data = [
+			{
+				start: startDate,
+				end : endDate,
+				content : "",
+				className : 'ctm-box-header',
+				type : "range",
+				'ctmItemType' : 'ctm-header'			
+			}
+		];
+
+		// specify options
+		var options = {
+			start : startDate,
+			end : endDate,
+			width:  timelinewidth,
+			height: timelineHeaderheigth,
+			editable: false,   // enable dragging and editing events
+			style: "range",
+			showMajorLabels : false,
+			showMinorLabels : false,
+			scale: projectModel.Scale,
+			step: projectModel.Step
+		};
+			
+		var timeline = new links.Timeline(element);
+		function onRangeChanged(properties) {
+				updateRanges(properties.start, properties.end);
+		}
+
+		// attach an event listener using the links events handler
+		links.events.addListener(timeline, 'rangechange', onRangeChanged);
+		timelines.push(timeline);
+		// Draw our timeline with the created data and options
+		timeline.draw(data, options);
+	}
+}
+	
+	
+ko.bindingHandlers.projectTimeLine = {
+	init: function(element, accessor){
+		var projectModel = accessor();
+		
+		// Create the JSON data table
+		var data = [
+			{
+				'start': new Date(projectModel.StartMoment()),
+				'end' : new Date(projectModel.EndMoment()),
+				'content' : "",
+				'className' : 'ctm-box-project',
+				'type' : "range",
+				'ctmItemType' : 'ctm-project'			
+			}
+		];
+
+		// specify options
+		var options = {
+			start : new Date(projectModel.StartMoment()),
+			end : new Date(projectModel.EndMoment()),
+			width:  timelinewidth,
+			height: timelineheigth,
+			editable: false,   // enable dragging and editing events
+			style: "range",
+			showMajorLabels : true,
+			showMinorLabels : true,
+			scale: projectModel.Scale,
+			step: projectModel.Step
+		};
+		
+		var timeline = new links.Timeline(element);
+		function onRangeChanged(properties) {
+				updateRanges(properties.start, properties.end);
+		}
+
+		// attach an event listener using the links events handler
+		links.events.addListener(timeline, 'rangechange', onRangeChanged);
+	
+		function onChanged(){
+			console.log(data[0].start.toLocaleString() + " " + data[0].end.toLocaleString());
+			projectModel.StartMoment(data[0].start);
+			projectModel.EndMoment(data[0].end);
+			
+		}
+
+		function onAdded(){
+			timeline.cancelAdd();
+		}
+		
+		links.events.addListener(timeline, 'change', onChanged);
+		links.events.addListener(timeline, 'add', onAdded);
+				
+		timelines.push(timeline);
+		// Draw our timeline with the created data and options
+		timeline.draw(data, options);
+	}
+}
+	
+	
+ko.bindingHandlers.taskTimeLine = {
+	init: function(element, accessor, allBindingsAccessor, viewModel, bindingContext){
+		var taskModel = accessor();
+		var data = [
+			{
+				'start': new Date(taskModel.StartMoment()),
+				'end' : new Date(taskModel.EndMoment()),
+				'content' : "taak <span data-taskid=" + taskModel.TaskId + "> </span> ",
+				'type' : "range",
+				'className' : 'ctm-box',
+				'ctmItemType' : 'ctm-task'
+			}
+		];
+		var parent = bindingContext.$parent;
+		// specify options
+		var options = {
+			start : new Date(parent.StartMoment()),
+			end : new Date(parent.EndMoment()),
+			width:  timelinewidth,
+			height: timelineheigth,
+			editable: true,   // enable dragging and editing events
+			style: "range",
+			showMajorLabels : false,
+			showMinorLabels : true,
+			scale: parent.Scale,
+			step: parent.Step
+		};
+		
+		var timeline = new links.Timeline(element);
+		
+		function onRangeChanged(properties) {
+			updateRanges(properties.start, properties.end);
+			var $positionNow = $(element).find(".timeline-currenttime").position().left;
+			$(element).next().css("left", $positionNow)
+	
+		}
+
+		// attach an event listener using the links events handler
+		links.events.addListener(timeline, 'rangechange', onRangeChanged);
+		
+		function onChanged(){
+			console.log(data[0].start.toLocaleString() + " " + data[0].end.toLocaleString());
+			taskModel.StartMoment(data[0].start);
+			taskModel.EndMoment(data[0].end);
+		}
+			
+			
+		function onAdded(){
+			timeline.cancelAdd();
+		}
+		
+		links.events.addListener(timeline, 'change', onChanged);
+		links.events.addListener(timeline, 'add', onAdded);
+	
+			
+		timelines.push(timeline);
+		// Draw our timeline with the created data and options
+		timeline.draw(data, options);
+		
+		
+		var $positionNow = $(element).find(".timeline-currenttime").position().left;
+		$(element).next().css("left", $positionNow);
+	}
+}
+
 var initialData = [
     { ProjectName: "Project 1", StartMoment: new Date(2013, 8, 1, 12, 0, 0 ),EndMoment: new Date(2013, 8, 5, 12, 0, 0 ), Tasks: [
         { TaskName: "Taak 1", StartMoment: new Date(2013, 8, 1, 12, 0 , 0 ), EndMoment: new Date(2013, 8, 1, 14, 0, 0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" },
@@ -34,7 +205,7 @@ function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
-var getInitialData = function (){
+var getInitialData = function (Scale, Step){
 	
 	var result = new Array();
 	
@@ -73,7 +244,9 @@ var getInitialData = function (){
 		var project = new Object();
 		project.ProjectName = "Project " + p;
 		project.Tasks = new Array();
-		
+		project.Scale = Scale;
+		project.Step = Step;
+
 		var nrTasksInProject = getRandomInt(minNrTasksPerProject,maxNrTasksPerProject);
 		 	
 		for(var t = 0; t <  nrTasksInProject; t++){
@@ -135,7 +308,8 @@ var koProjectModel = function(project){
 				return new koTaskModel(task);
 			}));
 	self.Completed = 70;					
-
+	self.Scale = project.Scale;
+	self.Step = project.Step;
 }
 
 
