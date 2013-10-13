@@ -33,12 +33,11 @@
 <div class="span10">
 	<table class="table table-striped">
 		<caption>Tasks</caption>
-		<thead><tr><th>Name</th><th>Assigned to</th><th>Completed</th><th>Supply Moment</th></tr></thead>
+		<thead><tr><th>Name</th><th>Assigned to</th><th>Supply Moment</th></tr></thead>
 		<tbody data-bind="foreach:tasks">
 			<tr>
 				<td data-bind="text:Name"></td>
 				<td data-bind="text:AssignedTo"></td>
-				<td data-bind="text:PercCompleted"></td>
 				<td>
 					<div data-bind="attr:{id: 'timelineRow-'+Priority}, timelineBox:$data"> </div>
 				</td>
@@ -59,22 +58,27 @@
 			init: function(element, accessor){
 				
 				var taskModel = accessor();
+				console.log(taskModel.StartedDate + " - " +taskModel.CompletionDate);
 				// Create the JSON data table
 				var data = [
-				   {
-						'start': new Date(taskModel.CompletionDate),
-						'content': "Taak"
+					{
+						'start': new Date(taskModel.StartedDate),
+						'end' : new Date(taskModel.CompletionDate),
+						'content' : taskModel.AssignedTo,
+						'type' : "box"			
 					}
 				];
 
 				// specify options
 				var options = {
-					'width':  'auto',
-					'height': 'auto',
-					'editable': true,   // enable dragging and editing events
-					'style': 'box',
-					'showMajorLabels' : false,
-					'showMinorLabels' : true
+					start : new Date(2013, 8, 1),
+					end : new Date(2013, 8, 5),
+					width:  "auto",
+					height: "auto",
+					editable: true,   // enable dragging and editing events
+					style: "box",
+					showMajorLabels : false,
+					showMinorLabels : false
 				};
 				
 			

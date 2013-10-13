@@ -1,3 +1,21 @@
+ko.extenders.date = function(target, format) {
+	    return ko.computed({
+	        read: function() {
+	            var value = target();
+	            if(typeof value === "string") {
+	                value = new Date(value);                
+	            }
+	            
+	            format = typeof format === "string" ? format: undefined;
+	            value = value.toLocaleString();
+	            
+	            return value;        
+	        },
+	        write: target
+	    });
+};
+
+
 var initialData = [
     { ProjectName: "Project 1", StartMoment: new Date(2013, 8, 1, 12, 0, 0 ),EndMoment: new Date(2013, 8, 5, 12, 0, 0 ), Tasks: [
         { TaskName: "Taak 1", StartMoment: new Date(2013, 8, 1, 12, 0 , 0 ), EndMoment: new Date(2013, 8, 1, 14, 0, 0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" },
@@ -12,15 +30,96 @@ var initialData = [
 ];
 
 
+function getRandomInt(min, max) {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+var getInitialData = function (){
+	
+	var result = new Array();
+	
+	var nrProjects = 10;
+	var maxNrTasksPerProject = 6;
+	var minNrTasksPerProject = 2;
+	
+	var maxNrOfDaysBeforeTodayOfProjectStart = 3;
+	var maxNrOfDaysAfterTodayOfProjectEnd = 3;
+	var dateRange = maxNrOfDaysBeforeTodayOfProjectStart + maxNrOfDaysAfterTodayOfProjectEnd;
+	var msInADay = 86400000;
+	var msInAnHour = 3600000;
+	
+	var minLengthOfTaskInHours = 1;
+	var maxLengthOfTaskInHours = 8;
+	
+	var todayDate = new Date();
+	
+	var todayDay = todayDate.getDate();
+	var todayMonth = todayDate.getMonth();
+	var todayYear = 2013;
+	var startOfTodayDate = new Date(2013, todayMonth, todayDay, 0, 0, 0 );
+	var msNow = startOfTodayDate.getTime();
+	var msMininmal = (msNow - maxNrOfDaysBeforeTodayOfProjectStart* msInADay);
+	var minimalDateStart = new Date(msMininmal); 
+	
+	var minMsProject = msNow + (msInADay*dateRange);
+	var maxmsProject = 0
+	
+	var taskIndex = 0;
+	for(var p = 1; p < nrProjects +1; p++){
+
+		var minMsProject = msNow + (msInADay*dateRange);
+		var maxmsProject = 0
+	
+		var project = new Object();
+		project.ProjectName = "Project " + p;
+		project.Tasks = new Array();
+		
+		var nrTasksInProject = getRandomInt(minNrTasksPerProject,maxNrTasksPerProject);
+		 	
+		for(var t = 0; t <  nrTasksInProject; t++){
+			var task = new Object();
+			
+			task.TaskId = taskIndex;
+			task.TaskName = "Taak " + t;
+			task.TeamName = "Team " + p;
+			
+			var taskMsStart = msMininmal + getRandomInt(0, dateRange)*msInADay;
+			var taskMsEnd = taskMsStart + getRandomInt(minLengthOfTaskInHours, maxLengthOfTaskInHours)*msInAnHour;
+			task.StartMoment = new Date(taskMsStart);
+			task.EndMoment = new Date(taskMsEnd);
+			
+			project.Tasks.push(task);
+			
+			if(minMsProject > taskMsStart){
+				minMsProject = taskMsStart;
+			}
+			
+			if(maxmsProject <taskMsEnd){
+				maxmsProject = taskMsEnd;
+			}
+			taskIndex++;
+		} 
+
+		project.StartMoment = new Date(minMsProject);
+		project.EndMoment = new Date(maxmsProject);
+		
+		result.push(project);
+		
+	}
+
+	return 	result;
+}
+
 var koTaskModel =function (task){
 
 	var self = this;
-	
+	self.TaskId = task.TaskId;
 	self.TaskName= task.TaskName;
-	self.StartMoment= ko.observable(new Date(task.StartMoment));
-	self.EndMoment= ko.observable(new Date(task.EndMoment));			
+	self.StartMoment= ko.observable(new Date(task.StartMoment)).extend({ date: true });
+	self.EndMoment= ko.observable(new Date(task.EndMoment)).extend({ date: true });			
 	self.TeamName= task.TeamName;
 	self.AssignedTo=ko.observable(task.AssignedTo);		
+	self.Completed = 80;
 
 	
 }
@@ -29,12 +128,13 @@ var koProjectModel = function(project){
 	var self = this;
 	
 	self.ProjectName = project.ProjectName, 
-	self.StartMoment = ko.observable(new Date(project.StartMoment)),
-	self.EndMoment = ko.observable(new Date(project.EndMoment)),
+	self.StartMoment = ko.observable(new Date(project.StartMoment)).extend({ date: true }),
+	self.EndMoment = ko.observable(new Date(project.EndMoment)).extend({ date: true }),
 	self.Tasks = ko.observableArray(
 			ko.utils.arrayMap(project.Tasks, function(task){
 				return new koTaskModel(task);
-			}));			
+			}));
+	self.Completed = 70;					
 
 }
 
@@ -52,16 +152,9 @@ var koProjectsModel = function(projects) {
 	self.save = function() {
         self.lastSavedJson(
 		JSON.stringify(ko.toJS(self.projects), null, 2));
-		
-		//var projTimes = "";
-		//for(var p =0; p < self.projects().length; p++){
-		//	projTimes += self.projects()[p].StartMoment().toLocaleString() + " - " + self.projects()[p].EndMoment().toLocaleString()	
-		//}
-
-		//self.lastSavedJson(projTimes);	
 	};
 	
-	self.firstStartDate = function(){
+	self.firstStartDate = ko.computed(function(){
 		var startDate = new Date(self.projects()[0].StartMoment());
 		
 		for(var p =1; p < self.projects().length; p++){
@@ -71,9 +164,9 @@ var koProjectsModel = function(projects) {
 		}
 		
 		return startDate;
-	};
+	});
 	
-	self.lastEndDate = function(){
+	self.lastEndDate = ko.computed(function(){
 		var endDate = new Date(self.projects()[0].EndMoment());
 		
 		for(var p =1; p < self.projects().length; p++){
@@ -83,8 +176,7 @@ var koProjectsModel = function(projects) {
 		}
 		
 		return endDate;
-	};
+	});	
 	
-    self.lastSavedJson = ko.observable("")
-	
+    self.lastSavedJson = ko.observable("");
 };

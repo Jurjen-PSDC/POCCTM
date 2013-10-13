@@ -44,7 +44,7 @@ tasks.addMockTasks();
 
 app.get('/', function (req, res)
 {
-    res.render('projects.html');
+    res.render('projects-templates.html');
 }); 
  
 app.get('/alltasks', tasksList.showTasks.bind(tasksList));

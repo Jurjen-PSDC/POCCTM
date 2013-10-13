@@ -36,7 +36,7 @@
 		<thead><tr><th>Name</th><th data-bind="headerTimeLine:$data">T</th></tr></thead>
 		<tbody data-bind="foreach:projects">
 			<tr>
-				<td> <input data-bind="value:ProjectName"></td>
+				<td data-bind="text:ProjectName"></td>
 				<td>	
 						<div data-bind="projectTimeLine:$data"> </div>
 				</td>
@@ -44,7 +44,7 @@
 			</tr>
 			<!-- ko foreach: Tasks -->
 				<tr>
-					<td> <input data-bind="value:TaskName"></td>
+					<td data-bind="text:TaskName"></td>
 					<!---<td data-bind="text:EndDate"></td> -->
 					<td>	
 						<div data-bind="taskTimeLine:$data"> </div>
@@ -52,7 +52,6 @@
 					
 				</tr>
 			<!-- /ko -->
-			
 		</tbody>
 	</table>
 	<textarea data-bind='value: lastSavedJson' rows='10' cols='500' disabled='disabled'> </textarea>
@@ -69,7 +68,7 @@
 	<script>
 
 	
-	  var timeline_width = "600px";	
+	  var timeline_width = "800px";	
 	  var timelines = new Array();
 	  
 	  
@@ -114,7 +113,7 @@
 					end : endDate,
 					width:  timeline_width,
 					height: "auto",
-					editable: true,   // enable dragging and editing events
+					editable: false,   // enable dragging and editing events
 					style: "box",
 					showMajorLabels : true,
 					showMinorLabels : true,
@@ -188,7 +187,12 @@
 					
 				}
 	
+				function onAdded(){
+					timeline.cancelAdd();
+				}
+				
 				links.events.addListener(timeline, 'change', onChanged);
+				links.events.addListener(timeline, 'add', onAdded);
 						
 				timelines.push(timeline);
 				// Draw our timeline with the created data and options
@@ -246,8 +250,14 @@
 					taskModel.EndMoment(data[0].end);
 					
 				}
-	
+				
+				
+				function onAdded(){
+					timeline.cancelAdd();
+				}
+				
 				links.events.addListener(timeline, 'change', onChanged);
+				links.events.addListener(timeline, 'add', onAdded);
 			
 				
 				timelines.push(timeline);
@@ -256,9 +266,11 @@
 				
 			}
 		}		
-
-		ko.applyBindings(new koProjectsModel(initialData));
-
+		var initialProjectData = getInitialData(); 
+		
+		ko.applyBindings(new koProjectsModel(initialProjectData));
+		
+	
 		});
 </script>
 

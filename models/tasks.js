@@ -3,6 +3,20 @@ var azure = require('azure'), uuid = require('node-uuid')
 module.exports = Tasks;
 
 
+// We need to add a prootype to the date object
+Date.prototype.addHours= function(h){
+    var copiedDate = new Date(this.getTime());
+    copiedDate.setHours(copiedDate.getHours()+h);
+    return copiedDate;
+}
+
+// We need to add a prootype to the date object
+Date.prototype.addMinutes= function(m){
+    var copiedDate = new Date(this.getTime());
+    copiedDate.setMinutes(copiedDate.getMinutes()+m);
+    return copiedDate;
+}
+
 function createMockTask(index, partitionKey){
 	
 	var taskNames =  ["Plan van aanpak","Mening ouder/jongere verwerkt",
@@ -13,21 +27,28 @@ function createMockTask(index, partitionKey){
 	var taskName = taskNames[taskNameId];
 	
 	var teamNames =  ["Team1","Team2","Administratie", "Buitendienst"];
-	var teamNameId = Math.floor((Math.random()*teamNames.length));
+	var teamNameId = Math.floor(Math.random()*teamNames.length);
 	var teamName = teamNames[teamNameId];	
 	
 	var projectNames =  ["ProjectA","ProjectB","ProjectC"];
-	var projectNameId = Math.floor((Math.random()*projectNames.length));
+	var projectNameId = Math.floor(Math.random()*projectNames.length);
 	var projectName = projectNames[projectNameId];	
 	
 	var teamMembers =  ["Jurjen","Michel","Luc", "Hans"];
-	var teamMemberId = Math.floor((Math.random()*teamMembers.length));
+	var teamMemberId = Math.floor(Math.random()*teamMembers.length);
 	var teamMember = teamMembers[teamMemberId];	
 	
-	var completed = Math.floor((Math.random()*100)+1);
-	var completedDay = Math.floor((Math.random()*30)+1);
-	var completionDate = new Date(2013,9,completedDay,12,00,0)
+	var completed = Math.floor(Math.random()*100)+1;
+	
+	var startedDay = Math.floor(Math.random()*10)+1;
+	var startedDate = new Date(2013,8,startedDay,09,00,0);
  	
+	var minutesToAddList = [15, 30, 45];
+	var minutesToAdd = minutesToAddList[Math.floor(Math.random()*3)];
+	var hoursToAdd = Math.floor(Math.random()*3);
+	var completionDate = new Date(2013,8,startedDay,09,00,0).addHours(hoursToAdd);
+ 	completionDate = completionDate.addMinutes(minutesToAdd);
+
 	var item = {
 		RowKey : uuid(),
         PartitionKey : partitionKey,
@@ -37,6 +58,7 @@ function createMockTask(index, partitionKey){
 		ProjectName : projectName,
 		AssignedTo : teamMember,
 		PercCompleted : completed,
+		StartDate: startedDate,
 		CompletionDate : completionDate
 	}
 	
@@ -48,9 +70,10 @@ function createMockTask(index, partitionKey){
 	console.log(" ProjectName " + item.ProjectName);
 	console.log(" AssignedTo " + item.AssignedTo);
 	console.log(" PercCompleted " + item.PercCompleted);
+	console.log(" StartDate " + item.StartDate);
+	console.log(" hoursToAdd / minutesToAdd " + hoursToAdd + " " + minutesToAdd);
 	console.log(" CompletionDate " + item.CompletionDate);
 			
-	
 	return item;
 } 
  
@@ -119,9 +142,9 @@ Tasks.prototype = {
              function entityInserted(error) {
                  if(error) {
                      callback(error);
-                 } 
+                 }
+                  
 			});
 		}
 	}	
 }
-

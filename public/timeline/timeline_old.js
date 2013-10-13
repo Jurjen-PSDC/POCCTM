@@ -30,8 +30,8 @@
  * Copyright (c) 2011-2013 Almende B.V.
  *
  * @author     Jos de Jong, <jos@almende.org>
- * @date    2013-08-20
- * @version 2.5.0
+ * @date    2013-04-18
+ * @version 2.4.2
  */
 
 /*
@@ -188,7 +188,6 @@ links.Timeline = function(container) {
         'moveable': true,
         'zoomable': true,
         'selectable': true,
-        'unselectable': true,
         'editable': false,
         'snapEvents': true,
         'groupChangeable': true,
@@ -259,6 +258,7 @@ links.Timeline = function(container) {
 };
 
 
+
 /**
  * Main drawing logic. This is the function that needs to be called
  * in the html page, to draw the timeline.
@@ -274,10 +274,6 @@ links.Timeline = function(container) {
  */
 links.Timeline.prototype.draw = function(data, options) {
     this.setOptions(options);
-    
-    if (this.options.selectable) {
-        links.Timeline.addClassName(this.dom.frame, "timeline-selectable");
-    }
 
     // read the data
     this.setData(data);
@@ -363,36 +359,31 @@ links.Timeline.prototype.addItemType = function (typeName, typeFactory) {
  *         group: undefined,
  *         className: undefined
  *         editable: undefined
- *         type: undefined
  *     }
  * @param {google.visualization.DataTable} dataTable
  * @type {Object} map
  */
 links.Timeline.mapColumnIds = function (dataTable) {
     var cols = {},
-        colCount = dataTable.getNumberOfColumns(),
+        colMax = dataTable.getNumberOfColumns(),
         allUndefined = true;
 
     // loop over the columns, and map the column id's to the column indexes
-    for (var col = 0; col < colCount; col++) {
+    for (var col = 0; col < colMax; col++) {
         var id = dataTable.getColumnId(col) || dataTable.getColumnLabel(col);
         cols[id] = col;
-        if (id == 'start' || id == 'end' || id == 'content' || id == 'group' ||
-            id == 'className' || id == 'editable' || id == 'type') {
+        if (id == 'start' || id == 'end' || id == 'content' ||
+            id == 'group' || id == 'className' || id == 'editable') {
             allUndefined = false;
         }
     }
 
-    // if no labels or ids are defined, use the default mapping
-    // for start, end, content, group, className, editable, type
+    // if no labels or ids are defined,
+    // use the default mapping for start, end, content
     if (allUndefined) {
         cols.start = 0;
         cols.end = 1;
         cols.content = 2;
-        if (colCount >= 3) {cols.group = 3}
-        if (colCount >= 4) {cols.className = 4}
-        if (colCount >= 5) {cols.editable = 5}
-        if (colCount >= 6) {cols.type = 6}
     }
 
     return cols;
@@ -430,9 +421,7 @@ links.Timeline.prototype.setData = function(data) {
                 'content':   ((cols.content != undefined)   ? data.getValue(row, cols.content)   : undefined),
                 'group':     ((cols.group != undefined)     ? data.getValue(row, cols.group)     : undefined),
                 'className': ((cols.className != undefined) ? data.getValue(row, cols.className) : undefined),
-                'editable':  ((cols.editable != undefined)  ? data.getValue(row, cols.editable)  : undefined),
-                'type':      ((cols.editable != undefined)  ? data.getValue(row, cols.type)      : undefined),
-                'ctmItemType': ((cols.editable != undefined)  ? data.getValue(row, cols.ctmItemType)      : undefined)
+                'editable':  ((cols.editable != undefined)  ? data.getValue(row, cols.editable)  : undefined)
             }));
         }
     }
@@ -726,12 +715,18 @@ links.Timeline.prototype.getDataRange = function (withMargin) {
                 start = item.start != undefined ? item.start.valueOf() : undefined,
                 end   = item.end != undefined   ? item.end.valueOf() : start;
 
-            if (start != undefined) {
-                min = (min != undefined) ? Math.min(min.valueOf(), start.valueOf()) : start;
+            if (min != undefined && start != undefined) {
+                min = Math.min(min.valueOf(), start.valueOf());
+            }
+            else {
+                min = start;
             }
 
-            if (end != undefined) {
-                max = (max != undefined) ? Math.max(max.valueOf(), end.valueOf()) : end;
+            if (max != undefined && end != undefined) {
+                max = Math.max(max, end);
+            }
+            else {
+                max = end;
             }
         }
     }
@@ -851,7 +846,7 @@ links.Timeline.prototype.repaintFrame = function() {
     // main frame
     if (!dom.frame) {
         dom.frame = document.createElement("DIV");
-        dom.frame.className = "timeline-frame ui-widget ui-widget-content ui-corner-all";
+        dom.frame.className = "timeline-frame";
         dom.frame.style.position = "relative";
         dom.frame.style.overflow = "hidden";
         dom.container.appendChild(dom.frame);
@@ -1874,8 +1869,10 @@ links.Timeline.prototype.repaintGroups = function() {
     labels.splice(needed, current - needed);
     labelLines.splice(needed, current - needed);
     itemLines.splice(needed, current - needed);
-    
-    links.Timeline.addClassName(frame, options.groupsOnRight ? 'timeline-groups-axis-onright' : 'timeline-groups-axis-onleft');
+
+    frame.style.borderStyle = options.groupsOnRight ?
+        "none none none solid" :
+        "none solid none none";
 
     // position the groups
     for (var i = 0, iMax = groups.length; i < iMax; i++) {
@@ -1954,13 +1951,7 @@ links.Timeline.prototype.repaintCurrentTime = function() {
         return;
     }
 
-	var now = new Date();
-    var nowOffset = new Date(now.valueOf() + this.clientTimeOffset);
-    var x = this.timeToScreen(nowOffset);
-	var visible = (x > -size.contentWidth && x < 2 * size.contentWidth);
-    
-		
-	if (!dom.currentTime) {
+    if (!dom.currentTime) {
         // create the current time bar
         var currentTime = document.createElement("DIV");
         currentTime.className = "timeline-currenttime";
@@ -1970,87 +1961,17 @@ links.Timeline.prototype.repaintCurrentTime = function() {
 
         dom.contentTimelines.appendChild(currentTime);
         dom.currentTime = currentTime;
-    
-	}
-	
-	
-	dom.currentTime.style.display = visible ? '' : 'none';
+    }
+
+    var now = new Date();
+    var nowOffset = new Date(now.valueOf() + this.clientTimeOffset);
+    var x = this.timeToScreen(nowOffset);
+
+    var visible = (x > -size.contentWidth && x < 2 * size.contentWidth);
+    dom.currentTime.style.display = visible ? '' : 'none';
     dom.currentTime.style.left = x + "px";
     dom.currentTime.title = "Current time: " + nowOffset;
 
-    // START CTM-CUSTOM-CODE
-    
-    // retrieving the item 
-    var taskorprojectItem = '';
-    var itemIsTaskOrProject = false;
-    if(this.items.length > 0){
-            if(taskorprojectItem.ctmItemType != 'ctm-header'){
-                itemIsTaskOrProject = true;
-                taskorprojectItem = this.items[0];
-            }
-    }
-
-            
-
-    // Create the DIV elements
-	if(!dom.ctmLeverMoment && itemIsTaskOrProject){
-
-        var divCTMLevermomentDriehoek= document.createElement("DIV");
-        var divCTMLevermoment = document.createElement("DIV");
-        var divCTMLevermomentBox = document.createElement("DIV");
-        
-        if(taskorprojectItem.ctmItemType === 'ctm-task'){
-            divCTMLevermomentDriehoek.className = "ctm-levermoment-driehoek-taak";
-            divCTMLevermoment.className = "ctm-levermoment-taak";
-            divCTMLevermomentBox.className = "ctm-levermoment-box-taak";
-        }
-
-        if(taskorprojectItem.ctmItemType === 'ctm-project'){
-            divCTMLevermomentDriehoek.className = "ctm-levermoment-driehoek-project";
-            divCTMLevermoment.className = "ctm-levermoment-project";
-            divCTMLevermomentBox.className = "ctm-levermoment-box-project";
-        }
-		  
-		divCTMLevermoment.appendChild(divCTMLevermomentDriehoek);
-		divCTMLevermomentBox.appendChild(divCTMLevermoment);
-		dom.contentTimelines.appendChild(divCTMLevermomentBox);
-		
-		dom.ctmLeverMoment = divCTMLevermomentBox;
-	}
-
-    // If we have found an item, we calculate its delivery time.
-    if(taskorprojectItem != '' && itemIsTaskOrProject){
-           var posCTMDeliveryMoment = this.ctmDeliveryTimeToScreen(taskorprojectItem, nowOffset);
-			dom.ctmLeverMoment.style.left = posCTMDeliveryMoment + "px";
-             console.log("posCTMDeliveryMoment is " + posCTMDeliveryMoment);
-    }
-	
-    // If we have a item and it is a task or a project item we will create the delivery line
-	if(!dom.ctmLeverMomentLijn && taskorprojectItem != '' && itemIsTaskOrProject){
-		var divCTMLevermomentLijn= document.createElement("DIV");
-		
-        if(taskorprojectItem.ctmItemType === 'ctm-task'){
-            divCTMLevermomentLijn.className = "ctm-levermoment-lijn-taak";
-        }
-
-        if(taskorprojectItem.ctmItemType === 'ctm-project'){
-            divCTMLevermomentLijn.className = "ctm-levermoment-lijn-project";
-        }
-
-
-        dom.contentTimelines.appendChild(divCTMLevermomentLijn);
-		dom.ctmLeverMomentLijn = divCTMLevermomentLijn;
-	}
-	
-    // If we have a item and it is a task or a proect we will calculate its dimensions
-	if(taskorprojectItem != '' && itemIsTaskOrProject){
-            var posCTMDeliveryLijn = this.ctmDeliveryLineToScreen(taskorprojectItem, nowOffset);
-			dom.ctmLeverMomentLijn.style.left = posCTMDeliveryLijn.linestart + "px";
-			dom.ctmLeverMomentLijn.style.width = posCTMDeliveryLijn.linelength + "px";	
-    }
-	
-	// END CTM-CUSTOM-CODE	
-	
     // start a timer to adjust for the new time
     if (this.currentTimeTimer != undefined) {
         clearTimeout(this.currentTimeTimer);
@@ -2232,7 +2153,7 @@ links.Timeline.prototype.repaintNavigation = function () {
             // create a navigation bar containing the navigation buttons
             navBar = document.createElement("DIV");
             navBar.style.position = "absolute";
-            navBar.className = "timeline-navigation ui-widget ui-state-highlight ui-corner-all";
+            navBar.className = "timeline-navigation";
             if (options.groupsOnRight) {
                 navBar.style.left = '10px';
             }
@@ -2253,11 +2174,8 @@ links.Timeline.prototype.repaintNavigation = function () {
             // create a new in button
             navBar.addButton = document.createElement("DIV");
             navBar.addButton.className = "timeline-navigation-new";
+
             navBar.addButton.title = options.CREATE_NEW_EVENT;
-            var addIconSpan = document.createElement("SPAN");
-            addIconSpan.className = "ui-icon ui-icon-circle-plus";            
-            navBar.addButton.appendChild(addIconSpan);
-            
             var onAdd = function(event) {
                 links.Timeline.preventDefault(event);
                 links.Timeline.stopPropagation(event);
@@ -2307,7 +2225,8 @@ links.Timeline.prototype.repaintNavigation = function () {
 
         if (showButtonNew && showNavigation) {
             // create a separator line
-            links.Timeline.addClassName(navBar.addButton, 'timeline-navigation-new-line');
+            navBar.addButton.style.borderRightWidth = "1px";
+            navBar.addButton.style.borderRightStyle = "solid";
         }
 
         if (showNavigation) {
@@ -2316,10 +2235,6 @@ links.Timeline.prototype.repaintNavigation = function () {
                 navBar.zoomInButton = document.createElement("DIV");
                 navBar.zoomInButton.className = "timeline-navigation-zoom-in";
                 navBar.zoomInButton.title = this.options.ZOOM_IN;
-                var ziIconSpan = document.createElement("SPAN");
-                ziIconSpan.className = "ui-icon ui-icon-circle-zoomin";
-                navBar.zoomInButton.appendChild(ziIconSpan);
-                
                 var onZoomIn = function(event) {
                     links.Timeline.preventDefault(event);
                     links.Timeline.stopPropagation(event);
@@ -2334,10 +2249,6 @@ links.Timeline.prototype.repaintNavigation = function () {
                 navBar.zoomOutButton = document.createElement("DIV");
                 navBar.zoomOutButton.className = "timeline-navigation-zoom-out";
                 navBar.zoomOutButton.title = this.options.ZOOM_OUT;
-                var zoIconSpan = document.createElement("SPAN");
-                zoIconSpan.className = "ui-icon ui-icon-circle-zoomout";
-                navBar.zoomOutButton.appendChild(zoIconSpan);
-                
                 var onZoomOut = function(event) {
                     links.Timeline.preventDefault(event);
                     links.Timeline.stopPropagation(event);
@@ -2354,10 +2265,6 @@ links.Timeline.prototype.repaintNavigation = function () {
                 navBar.moveLeftButton = document.createElement("DIV");
                 navBar.moveLeftButton.className = "timeline-navigation-move-left";
                 navBar.moveLeftButton.title = this.options.MOVE_LEFT;
-                var mlIconSpan = document.createElement("SPAN");
-                mlIconSpan.className = "ui-icon ui-icon-circle-arrow-w";
-                navBar.moveLeftButton.appendChild(mlIconSpan);
-                
                 var onMoveLeft = function(event) {
                     links.Timeline.preventDefault(event);
                     links.Timeline.stopPropagation(event);
@@ -2372,10 +2279,6 @@ links.Timeline.prototype.repaintNavigation = function () {
                 navBar.moveRightButton = document.createElement("DIV");
                 navBar.moveRightButton.className = "timeline-navigation-move-right";
                 navBar.moveRightButton.title = this.options.MOVE_RIGHT;
-                var mrIconSpan = document.createElement("SPAN");
-                mrIconSpan.className = "ui-icon ui-icon-circle-arrow-e";
-                navBar.moveRightButton.appendChild(mrIconSpan);
-                
                 var onMoveRight = function(event) {
                     links.Timeline.preventDefault(event);
                     links.Timeline.stopPropagation(event);
@@ -2534,124 +2437,6 @@ links.Timeline.prototype.timeToScreen = function(time) {
     return (time.valueOf() - conversion.offset) * conversion.factor;
 };
 
-
-
-/**
- *	CTM -CUSTOM function
- *  Converts the time of the task (Date object) into a position on the screen.
- *  @param {task} The task being shown for this timeline
- *  @param {timeNow} The date object representing the current time
- *  @return {int} x value of the position on the screen of the delvery moment
- */
-links.Timeline.prototype.ctmDeliveryTimeToScreen = function(task, timeNow){
-	
-	var dateTimeTaskStart = new Date(task.start);
-	var dateTimeTaskEnd = new Date(task.end);
-	var dateTimeNow = new Date(timeNow);
-	var dateTimeDeliveryTime;
-	
-	var taskStartTicks = dateTimeTaskStart.getTime();
-	var taskEndTicks = dateTimeTaskEnd.getTime();
-	var nowTicks = dateTimeNow.getTime();
-		
-	
-	if(dateTimeNow > dateTimeTaskEnd){
-		// If the end time of the task is in the past, the delivery moment 
-		// should be displayed for the length of the task after the current time.
-		var diffTask = taskEndTicks - taskStartTicks;
-		var deliveryTimeTicks = nowTicks + diffTask;
-		dateTimeDeliveryTime = new Date(deliveryTimeTicks);
-		
-	}else if ((dateTimeNow < dateTimeTaskEnd) && (dateTimeNow > dateTimeTaskStart)){
-		// If the end time of the task is still in the future, but the start of the 
-		// task is in the past, the delivery time is the now + remaing time of the task
-		
-		var diffBetweenNowAndEnd = taskEndTicks - taskStartTicks;
-		var deliveryTimeTicks = nowTicks + diffBetweenNowAndEnd;
-		dateTimeDeliveryTime = new Date(deliveryTimeTicks);
-	}else{
-		// The complete task is in the future, the delivery moment 
-		// is then defined as the end of the task
-		dateTimeDeliveryTime = dateTimeTaskEnd;
-	}
-	
-	var conversion = this.conversion;
-    return (dateTimeDeliveryTime.valueOf() - conversion.offset ) * conversion.factor;
-	
-};
-
-/**
- *	CTM-CUSTOM function
- *  Calculates the start and end position of the delivery line.
- *  The following rules apply:
- *  1)The task is in the future: length of the line is length of the task
- *  2)The end date of the task is in the past, the length of the line is from
- *	  the start of the task until Now + length of the task
- *  3)The end date of the task is in the future, but the start of the task is 
- *    in the past, then the length of the task is from Now until the length of the
- *    task.
- *
- *  @param {task} The task being shown for this timeline
- *  @param {timeNow} The date object representing the current time
- *  @return {Object} with properties linestart, lineend and linelength 
- *			representing the start, end positions of the line in pixels and 
- *	 		
- *
- *
- */
-links.Timeline.prototype.ctmDeliveryLineToScreen = function(task, timeNow){
-	
-	var dateTimeTaskStart = new Date(task.start);
-	var dateTimeTaskEnd = new Date(task.end);
-	var dateTimeNow = new Date(timeNow);
-
-	var taskStartTicks = dateTimeTaskStart.getTime();
-	var taskEndTicks = dateTimeTaskEnd.getTime();
-	var nowTicks = dateTimeNow.getTime();
-	
-	var dateTimeDeliveryLineStart;	
-	var dateTimeDeliveryLineEnd;	
-	
-	var posLineStart;
-	var posLineEnd;
-	var lineLength;
-	var result = new Object();
-	
-	if(dateTimeNow > dateTimeTaskEnd){
-		// If the end time of the task is in the past, the delivery moment 
-		// should be displayed for the length of the task after the current time.
-		var diffTask = taskEndTicks - taskStartTicks;
-		var deliveryTimeTicks = nowTicks + diffTask;
-		dateTimeDeliveryLineEnd = new Date(deliveryTimeTicks);
-		dateTimeDeliveryLineStart = new Date(dateTimeTaskStart);
-		
-	}else if ((dateTimeNow < dateTimeTaskEnd) && (dateTimeNow > dateTimeTaskStart)){
-		// If the end time of the task is still in the future, but the start of the 
-		// task is in the past, the delivery time is the now + remaing time of the task
-		
-		var diffBetweenNowAndEnd = taskEndTicks - taskStartTicks;
-		var deliveryTimeTicks = nowTicks + diffBetweenNowAndEnd;
-		dateTimeDeliveryLineEnd = new Date(deliveryTimeTicks);
-		dateTimeDeliveryLineStart = dateTimeNow;
-		
-	}else{
-		// The complete task is in the future, the delivery moment 
-		// is then defined as the end of the task
-		dateTimeDeliveryLineEnd = dateTimeTaskEnd;
-		dateTimeDeliveryLineStart = dateTimeTaskStart;
-	}
-	
-	var conversion = this.conversion;
-    posLineEnd = (dateTimeDeliveryLineEnd.valueOf() - conversion.offset ) * conversion.factor;
-	posLineStart = (dateTimeDeliveryLineStart.valueOf() - conversion.offset ) * conversion.factor;
-	lineLength = posLineEnd - posLineStart;
-	
-	result.linestart = posLineStart;
-	result.lineend = posLineEnd;
-	result.linelength = lineLength;
-	
-	return result;
-};
 
 
 /**
@@ -3158,10 +2943,8 @@ links.Timeline.prototype.onMouseUp = function (event) {
                     }
                 }
                 else {
-                    if (options.unselectable) {
-                        this.unselectItem();
-                        this.trigger('select');
-                    }
+                    this.unselectItem();
+                    this.trigger('select');
                 }
             }
         }
@@ -3297,19 +3080,7 @@ links.Timeline.prototype.onMouseWheel = function(event) {
             timeline.trigger("rangechanged");
         };
 
-        var scroll = function () {
-            // Scroll the timeline
-            timeline.move(delta * -0.2);
-            timeline.trigger("rangechange");
-            timeline.trigger("rangechanged");
-        };
-
-        if (event.shiftKey) {
-            scroll();
-        }
-        else {
-            zoom();
-        }
+        zoom();
     }
 
     // Prevent default actions caused by mouse wheel.
@@ -3632,7 +3403,7 @@ links.Timeline.prototype.getGroupFromHeight = function(height) {
 /**
  * @constructor links.Timeline.Item
  * @param {Object} data       Object containing parameters start, end
- *                            content, group, type, editable.
+ *                            content, group. type, group.
  * @param {Object} [options]  Options to set initial property values
  *                                {Number} top
  *                                {Number} left
@@ -3651,8 +3422,6 @@ links.Timeline.Item = function (data, options) {
         this.className = data.className;
         this.editable = data.editable;
         this.group = data.group;
-        this.type = data.type;
-        this.ctmItemType = data.ctmItemType;
     }
     this.top = 0;
     this.left = 0;
@@ -3793,7 +3562,6 @@ links.Timeline.Item.prototype.getRight = function (timeline) {
 };
 
 /**
- * Calculate the width of the item
  * @param {links.Timeline} timeline
  * @return {Number} width
  */
@@ -3807,7 +3575,7 @@ links.Timeline.Item.prototype.getWidth = function (timeline) {
  * @constructor links.Timeline.ItemBox
  * @extends links.Timeline.Item
  * @param {Object} data       Object containing parameters start, end
- *                            content, group, type, className, editable.
+ *                            content, group. type, group.
  * @param {Object} [options]  Options to set initial property values
  *                                {Number} top
  *                                {Number} left
@@ -3849,9 +3617,9 @@ links.Timeline.ItemBox.prototype.reflow = function () {
  */
 links.Timeline.ItemBox.prototype.select = function () {
     var dom = this.dom;
-    links.Timeline.addClassName(dom, 'timeline-event-selected ui-state-active');
-    links.Timeline.addClassName(dom.line, 'timeline-event-selected ui-state-active');
-    links.Timeline.addClassName(dom.dot, 'timeline-event-selected ui-state-active');
+    links.Timeline.addClassName(dom, 'timeline-event-selected');
+    links.Timeline.addClassName(dom.line, 'timeline-event-selected');
+    links.Timeline.addClassName(dom.dot, 'timeline-event-selected');
 };
 
 /**
@@ -3860,10 +3628,15 @@ links.Timeline.ItemBox.prototype.select = function () {
  */
 links.Timeline.ItemBox.prototype.unselect = function () {
     var dom = this.dom;
-    links.Timeline.removeClassName(dom, 'timeline-event-selected ui-state-active');
-    links.Timeline.removeClassName(dom.line, 'timeline-event-selected ui-state-active');
-    links.Timeline.removeClassName(dom.dot, 'timeline-event-selected ui-state-active');
+    links.Timeline.removeClassName(dom, 'timeline-event-selected');
+    links.Timeline.removeClassName(dom.line, 'timeline-event-selected');
+    links.Timeline.removeClassName(dom.dot, 'timeline-event-selected');
 };
+
+
+
+
+
 
 /**
  * Creates the DOM for the item, depending on its type
@@ -3877,13 +3650,20 @@ links.Timeline.ItemBox.prototype.createDOM = function () {
     divBox.style.left = this.left + "px";
     divBox.style.top = this.top + "px";
 
-	
     // contents box (inside the background box). used for making margins
     var divContent = document.createElement("DIV");
     divContent.className = "timeline-event-content";
     divContent.innerHTML = this.content;
     divBox.appendChild(divContent);
 
+	/**
+	 * CTM Custom
+	 */
+	
+	var divCTMLevermomentBox = this.ctmCreateDeliveryMomentDiv();
+	divBox.appendChild(divCTMLevermomentBox);
+    
+    
 	
     // line to axis
     var divLine = document.createElement("DIV");
@@ -3970,14 +3750,14 @@ links.Timeline.ItemBox.prototype.updateDOM = function () {
         divBox.firstChild.innerHTML = this.content;
 
         // update class
-        divBox.className = "timeline-event timeline-event-box ui-widget ui-state-default";
-        divLine.className = "timeline-event timeline-event-line ui-widget ui-state-default";
-        divDot.className  = "timeline-event timeline-event-dot ui-widget ui-state-default";
+        divBox.className = "timeline-event timeline-event-box";
+        divLine.className = "timeline-event timeline-event-line";
+        divDot.className  = "timeline-event timeline-event-dot";
 
         if (this.isCluster) {
-            links.Timeline.addClassName(divBox, 'timeline-event-cluster ui-widget-header');
-            links.Timeline.addClassName(divLine, 'timeline-event-cluster ui-widget-header');
-            links.Timeline.addClassName(divDot, 'timeline-event-cluster ui-widget-header');
+            links.Timeline.addClassName(divBox, 'timeline-event-cluster');
+            links.Timeline.addClassName(divLine, 'timeline-event-cluster');
+            links.Timeline.addClassName(divDot, 'timeline-event-cluster');
         }
 
         // add item specific class name when provided
@@ -4098,7 +3878,7 @@ links.Timeline.ItemBox.prototype.getRight = function (timeline) {
  * @constructor links.Timeline.ItemRange
  * @extends links.Timeline.Item
  * @param {Object} data       Object containing parameters start, end
- *                            content, group, type, className, editable.
+ *                            content, group. type, group.
  * @param {Object} [options]  Options to set initial property values
  *                                {Number} top
  *                                {Number} left
@@ -4117,7 +3897,7 @@ links.Timeline.ItemRange.prototype = new links.Timeline.Item();
  */
 links.Timeline.ItemRange.prototype.select = function () {
     var dom = this.dom;
-    links.Timeline.addClassName(dom, 'timeline-event-selected ui-state-active');
+    links.Timeline.addClassName(dom, 'timeline-event-selected');
 };
 
 /**
@@ -4126,7 +3906,12 @@ links.Timeline.ItemRange.prototype.select = function () {
  */
 links.Timeline.ItemRange.prototype.unselect = function () {
     var dom = this.dom;
-    links.Timeline.removeClassName(dom, 'timeline-event-selected ui-state-active');
+    links.Timeline.removeClassName(dom, 'timeline-event-selected');
+};
+
+
+links.Timeline.ItemRange.prototype.sayHello = function (){
+    console.log("a;ksd;lakd;akda");
 };
 
 /**
@@ -4139,11 +3924,21 @@ links.Timeline.ItemRange.prototype.createDOM = function () {
     var divBox = document.createElement("DIV");
     divBox.style.position = "absolute";
 
-	// contents box
+    // contents box
     var divContent = document.createElement("DIV");
     divContent.className = "timeline-event-content";
     divBox.appendChild(divContent);
 
+	/**
+	 * CTM Custom
+	 */
+	
+    var divCTMLevermomentBox = this.ctmCreateDeliveryMomentDiv();
+    divBox.appendChild(divCTMLevermomentBox);
+
+	
+	
+	
     this.dom = divBox;
     this.updateDOM();
 
@@ -4201,10 +3996,10 @@ links.Timeline.ItemRange.prototype.updateDOM = function () {
         divBox.firstChild.innerHTML = this.content;
 
         // update class
-        divBox.className = "timeline-event timeline-event-range ui-widget ui-state-default";
+        divBox.className = "timeline-event timeline-event-range";
 
         if (this.isCluster) {
-            links.Timeline.addClassName(divBox, 'timeline-event-cluster ui-widget-header');
+            links.Timeline.addClassName(divBox, 'timeline-event-cluster');
         }
 
         // add item specific class name when provided
@@ -4302,7 +4097,7 @@ links.Timeline.ItemRange.prototype.getWidth = function (timeline) {
  * @constructor links.Timeline.ItemDot
  * @extends links.Timeline.Item
  * @param {Object} data       Object containing parameters start, end
- *                            content, group, type, className, editable.
+ *                            content, group, type.
  * @param {Object} [options]  Options to set initial property values
  *                                {Number} top
  *                                {Number} left
@@ -4344,7 +4139,7 @@ links.Timeline.ItemDot.prototype.reflow = function () {
  */
 links.Timeline.ItemDot.prototype.select = function () {
     var dom = this.dom;
-    links.Timeline.addClassName(dom, 'timeline-event-selected ui-state-active');
+    links.Timeline.addClassName(dom, 'timeline-event-selected');
 };
 
 /**
@@ -4353,8 +4148,12 @@ links.Timeline.ItemDot.prototype.select = function () {
  */
 links.Timeline.ItemDot.prototype.unselect = function () {
     var dom = this.dom;
-    links.Timeline.removeClassName(dom, 'timeline-event-selected ui-state-active');
+    links.Timeline.removeClassName(dom, 'timeline-event-selected');
 };
+
+
+
+
 
 /**
  * Creates the DOM for the item, depending on its type
@@ -4366,11 +4165,19 @@ links.Timeline.ItemDot.prototype.createDOM = function () {
     var divBox = document.createElement("DIV");
     divBox.style.position = "absolute";
 
-	// contents box, right from the dot
+    // contents box, right from the dot
     var divContent = document.createElement("DIV");
     divContent.className = "timeline-event-content";
     divBox.appendChild(divContent);
 
+    /**
+	 * CTM Custom
+	 */
+
+    var divCTMLevermomentBox = this.ctmCreateDeliveryMomentDiv();
+    divBox.appendChild(divCTMLevermomentBox);
+
+	
     // dot at start
     var divDot = document.createElement("DIV");
     divDot.style.position = "absolute";
@@ -4438,13 +4245,12 @@ links.Timeline.ItemDot.prototype.updateDOM = function () {
         // update contents
         divBox.firstChild.innerHTML = this.content;
 
-        // update classes
-        divBox.className = "timeline-event-dot-container";
-        divDot.className  = "timeline-event timeline-event-dot ui-widget ui-state-default";
+        // update class
+        divDot.className  = "timeline-event timeline-event-dot";
 
         if (this.isCluster) {
-            links.Timeline.addClassName(divBox, 'timeline-event-cluster ui-widget-header');
-            links.Timeline.addClassName(divDot, 'timeline-event-cluster ui-widget-header');
+            links.Timeline.addClassName(divBox, 'timeline-event-cluster');
+            links.Timeline.addClassName(divDot, 'timeline-event-cluster');
         }
 
         // add item specific class name when provided
@@ -4523,14 +4329,13 @@ links.Timeline.ItemDot.prototype.getRight = function (timeline) {
 /**
  * Retrieve the properties of an item.
  * @param {Number} index
- * @return {Object} properties  Object containing item properties:<br>
+ * @return {Object} properties   Object containing item properties:<br>
  *                              {Date} start (required),
  *                              {Date} end (optional),
  *                              {String} content (required),
  *                              {String} group (optional),
  *                              {String} className (optional)
  *                              {boolean} editable (optional)
- *                              {String} type (optional)
  */
 links.Timeline.prototype.getItem = function (index) {
     if (index >= this.items.length) {
@@ -4554,14 +4359,6 @@ links.Timeline.prototype.getItem = function (index) {
     if (item.hasOwnProperty('editable') && (typeof item.editable != 'undefined')) {
         properties.editable = item.editable;
     }
-    if (item.type) {
-        properties.type = item.type;
-    }
-
-    // CTM-CUSTOM-CODE
-    if('ctmItemType' in item){
-        properties.ctmItemType = this.getGroupName(item.ctmItemType);
-    }
 
     return properties;
 };
@@ -4573,9 +4370,6 @@ links.Timeline.prototype.getItem = function (index) {
  *                              {Date} end (optional),
  *                              {String} content (required),
  *                              {String} group (optional)
- *                              {String} className (optional)
- *                              {Boolean} editable (optional)
- *                              {String} type (optional)
  * @param {boolean} [preventRender=false]   Do not re-render timeline if true
  */
 links.Timeline.prototype.addItem = function (itemData, preventRender) {
@@ -4593,10 +4387,7 @@ links.Timeline.prototype.addItem = function (itemData, preventRender) {
  *                            {Date} start,
  *                            {Date} end,
  *                            {String} content with text or HTML code,
- *                            {String} group (optional)
- *                            {String} className (optional)
- *                            {String} editable (optional)
- *                            {String} type (optional)
+ *                            {String} group
  * @param {boolean} [preventRender=false]   Do not re-render timeline if true
  */
 links.Timeline.prototype.addItems = function (itemsData, preventRender) {
@@ -4633,16 +4424,14 @@ links.Timeline.prototype.addItems = function (itemsData, preventRender) {
  * @return {Object} item
  */
 links.Timeline.prototype.createItem = function(itemData) {
-    var type = itemData.type || (itemData.end ? 'range' : this.options.style);
+    var type = itemData.end ? 'range' : this.options.style;
     var data = {
         start: itemData.start,
         end: itemData.end,
         content: itemData.content,
         className: itemData.className,
         editable: itemData.editable,
-        group: this.getGroup(itemData.group),
-        type: type,
-        ctmItemType: itemData.ctmItemType
+        group: this.getGroup(itemData.group)
     };
     // TODO: optimize this, when creating an item, all data is copied twice...
 
@@ -4684,14 +4473,12 @@ links.Timeline.prototype.changeItem = function (index, itemData, preventRender) 
 
     // replace item, merge the changes
     var newItem = this.createItem({
-        'start':     itemData.hasOwnProperty('start') ?     itemData.start :     oldItem.start,
-        'end':       itemData.hasOwnProperty('end') ?       itemData.end :       oldItem.end,
-        'content':   itemData.hasOwnProperty('content') ?   itemData.content :   oldItem.content,
-        'group':     itemData.hasOwnProperty('group') ?     itemData.group :     this.getGroupName(oldItem.group),
+        'start':   itemData.hasOwnProperty('start') ?   itemData.start :   oldItem.start,
+        'end':     itemData.hasOwnProperty('end') ?     itemData.end :     oldItem.end,
+        'content': itemData.hasOwnProperty('content') ? itemData.content : oldItem.content,
+        'group':   itemData.hasOwnProperty('group') ?   itemData.group :   this.getGroupName(oldItem.group),
         'className': itemData.hasOwnProperty('className') ? itemData.className : oldItem.className,
-        'editable':  itemData.hasOwnProperty('editable') ?  itemData.editable :  oldItem.editable,
-        'type':      itemData.hasOwnProperty('type') ?      itemData.type :      oldItem.type,
-        'ctmItemType' : itemData.hasOwnProperty('ctmItemType') ?      itemData.ctmItemType :      oldItem.ctmItemType
+        'editable': itemData.hasOwnProperty('editable') ? itemData.editable : oldItem.editable
     });
     this.items[index] = newItem;
 
@@ -4713,9 +4500,7 @@ links.Timeline.prototype.changeItem = function (index, itemData, preventRender) 
             animate: false
         });
 
-        if (this.selection && this.selection.index == index) {
-            newItem.select();
-        }
+        newItem.select();
     }
 };
 
@@ -6511,21 +6296,24 @@ links.Timeline.getAbsoluteTop = function(elem) {
  * @return {Number} pageY
  */
 links.Timeline.getPageY = function (event) {
-    if (('targetTouches' in event) && event.targetTouches.length) {
-        event = event.targetTouches[0];
-    }
-
     if ('pageY' in event) {
         return event.pageY;
     }
+    else {
+        var clientY;
+        if (('targetTouches' in event) && event.targetTouches.length) {
+            clientY = event.targetTouches[0].clientY;
+        }
+        else {
+            clientY = event.clientY;
+        }
 
-    // calculate pageY from clientY
-    var clientY = event.clientY;
-    var doc = document.documentElement;
-    var body = document.body;
-    return clientY +
-        ( doc && doc.scrollTop || body && body.scrollTop || 0 ) -
-        ( doc && doc.clientTop || body && body.clientTop || 0 );
+        var doc = document.documentElement;
+        var body = document.body;
+        return clientY +
+            ( doc && doc.scrollTop || body && body.scrollTop || 0 ) -
+            ( doc && doc.clientTop || body && body.clientTop || 0 );
+    }
 };
 
 /**
@@ -6534,64 +6322,49 @@ links.Timeline.getPageY = function (event) {
  * @return {Number} pageX
  */
 links.Timeline.getPageX = function (event) {
-    if (('targetTouches' in event) && event.targetTouches.length) {
-        event = event.targetTouches[0];
-    }
-
-    if ('pageX' in event) {
+    if ('pageY' in event) {
         return event.pageX;
     }
+    else {
+        var clientX;
+        if (('targetTouches' in event) && event.targetTouches.length) {
+            clientX = event.targetTouches[0].clientX;
+        }
+        else {
+            clientX = event.clientX;
+        }
 
-    // calculate pageX from clientX
-    var clientX = event.clientX;
-    var doc = document.documentElement;
-    var body = document.body;
-    return clientX +
-        ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) -
-        ( doc && doc.clientLeft || body && body.clientLeft || 0 );
+        var doc = document.documentElement;
+        var body = document.body;
+        return clientX +
+            ( doc && doc.scrollLeft || body && body.scrollLeft || 0 ) -
+            ( doc && doc.clientLeft || body && body.clientLeft || 0 );
+    }
 };
 
 /**
- * Adds one or more className's to the given elements style
+ * add a className to the given elements style
  * @param {Element} elem
  * @param {String} className
  */
 links.Timeline.addClassName = function(elem, className) {
     var classes = elem.className.split(' ');
-    var classesToAdd = className.split(' ');
-    
-    var added = false;
-    for (var i=0; i<classesToAdd.length; i++) {
-        if (classes.indexOf(classesToAdd[i]) == -1) {
-            classes.push(classesToAdd[i]); // add the class to the array
-            added = true;
-        }
-    }
-    
-    if (added) {
+    if (classes.indexOf(className) == -1) {
+        classes.push(className); // add the class to the array
         elem.className = classes.join(' ');
     }
 };
 
 /**
- * Removes one or more className's from the given elements style
+ * add a className to the given elements style
  * @param {Element} elem
  * @param {String} className
  */
 links.Timeline.removeClassName = function(elem, className) {
     var classes = elem.className.split(' ');
-    var classesToRemove = className.split(' ');
-    
-    var removed = false;
-    for (var i=0; i<classesToRemove.length; i++) {
-        var index = classes.indexOf(classesToRemove[i]);
-        if (index != -1) {
-            classes.splice(index, 1); // remove the class from the array
-            removed = true;
-        }
-    }
-    
-    if (removed) {
+    var index = classes.indexOf(className);
+    if (index != -1) {
+        classes.splice(index, 1); // remove the class from the array
         elem.className = classes.join(' ');
     }
 };
@@ -6647,3 +6420,96 @@ links.Timeline.parseJSONDate = function (date) {
     // failing that, try to parse whatever we've got.
     return Date.parse(date);
 };
+
+/**
+ * CTM Custom
+ *  
+ *  
+ */
+
+links.Timeline.prototype.sayHello = function(){
+    console.log("Hello");
+};
+
+links.Timeline.prototype.ctmCreateDeliveryMomentDiv = function(){
+    
+    var divCTMLevermomentDriehoek= document.createElement("DIV");
+    divCTMLevermomentDriehoek.className = "ctm-levermoment-driehoek";
+    
+    var divCTMLevermoment = document.createElement("DIV");
+    divCTMLevermoment.className = "ctm-levermoment";
+    
+    
+    var now = new Date();
+    var nowOffset = new Date(now.valueOf()); // remember that this was new Date(now.valueOf() + this.clientTimeOffset );
+    console.log("nowOffset = " + nowOffset);
+    var x = links.Timeline.timeToScreen(nowOffset);
+    var visible = (x > -size.contentWidth && x < 2 * size.contentWidth);
+    
+    var divCTMLevermomentBox = document.createElement("DIV");
+    divCTMLevermomentBox.className = "ctm-levermoment-box";
+    divCTMLevermomentBox.currentTime.style.display = visible ? '' : 'none';
+    divCTMLevermomentBox.currentTime.style.left = x + "px";
+      
+   
+    divCTMLevermoment.appendChild(divCTMLevermomentDriehoek);
+    divCTMLevermomentBox.appendChild(divCTMLevermoment);
+    
+    return divCTMLevermomentBox;
+};
+
+
+links.Timeline.ItemBox.prototype.ctmCreateDeliveryMomentDiv = function(){
+    
+    var divCTMLevermomentDriehoek= document.createElement("DIV");
+    divCTMLevermomentDriehoek.className = "ctm-levermoment-driehoek";
+    
+    var divCTMLevermoment = document.createElement("DIV");
+    divCTMLevermoment.className = "ctm-levermoment";
+    
+    
+    var now = new Date();
+    var nowOffset = new Date(now.valueOf() + this.clientTimeOffset);
+    var x = links.Timeline.timeToScreen(nowOffset);
+    var visible = (x > -size.contentWidth && x < 2 * size.contentWidth);
+    
+    var divCTMLevermomentBox = document.createElement("DIV");
+    divCTMLevermomentBox.className = "ctm-levermoment-box";
+    divCTMLevermomentBox.currentTime.style.display = visible ? '' : 'none';
+    divCTMLevermomentBox.currentTime.style.left = x + "px";
+      
+   
+    divCTMLevermoment.appendChild(divCTMLevermomentDriehoek);
+    divCTMLevermomentBox.appendChild(divCTMLevermoment);
+    
+    return divCTMLevermomentBox;
+};
+
+links.Timeline.ItemRange.prototype.ctmCreateDeliveryMomentDiv = function(){
+    
+    var linxs = new links.Timeline()    
+    var divCTMLevermomentDriehoek= document.createElement("DIV");
+    divCTMLevermomentDriehoek.className = "ctm-levermoment-driehoek";
+    
+    var divCTMLevermoment = document.createElement("DIV");
+    divCTMLevermoment.className = "ctm-levermoment";
+    
+    
+    var now = new Date();
+    var nowOffset = new Date(now.valueOf());// + linxs.clientTimeOffset);
+    console.log("now nowOffset: "+ nowOffset);
+    var x = linxs.timeToScreen(nowOffset);
+    var visible = (x > -size.contentWidth && x < 2 * size.contentWidth);
+    
+    var divCTMLevermomentBox = document.createElement("DIV");
+    divCTMLevermomentBox.className = "ctm-levermoment-box";
+    divCTMLevermomentBox.currentTime.style.display = visible ? '' : 'none';
+    divCTMLevermomentBox.currentTime.style.left = x + "px";
+      
+   
+    divCTMLevermoment.appendChild(divCTMLevermomentDriehoek);
+    divCTMLevermomentBox.appendChild(divCTMLevermoment);
+    
+    return divCTMLevermomentBox;
+};
+

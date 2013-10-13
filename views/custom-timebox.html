@@ -7,6 +7,7 @@
 	<!-- Bootstrap -->
     <link href="css/bootstrap.min.css" rel="stylesheet" media="screen">	
 	<!-- TimeLine -->
+	<script src="js/date.js"></script>
 	<script type="text/javascript" src="timeline/timeline.js"></script>
 	
 	<link rel="stylesheet" href="css/boxes.css">
@@ -18,6 +19,7 @@
 	<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
 	<script src="http://code.jquery.com/ui/1.10.3/jquery-ui.js"></script>
 	<script src="js/jquery.ui.touch-punch.min.js"></script>
+	
 	
  </head>
 <body>
@@ -51,9 +53,9 @@
 				<td data-bind="text:Name"></td>
 				<td data-bind="text:AssignedTo"></td>
 				<td data-bind="text:PercCompleted"></td>
-				<td> <div data-bind="attr: { id: 'timelineRow'+Priority}"> 
+				<td> <div data-bind="attr: { id: 'timelineRow-'+RowKey}"> 
 					<div class="time-line-box"> 
-						<div data-bind="attr: { id: 'task-box'+Priority}, draggableItem:{}" class="task-box"><span></span></div>
+						<div data-bind="attr: { id: 'task-box-'+RowKey}, draggableItem: $data" class="task-box"><span></span></div>
 					</div>
 				</div>
 				</td>
@@ -70,7 +72,28 @@
 <script type="text/javaScript" src="komodels/taskmodel.js"></script> 
 	<script>
 	  $(document).ready(function () {
-		 
+			
+		ko.bindingHandlers.draggableItem = {
+			init: function (element, valueAccessor){
+					var taskItem = valueAccessor();
+					var normalDate = Date.today(); //parse(taskItem.CompletionDate);
+					console.log(normalDate);
+					var date = normalDate.toString("d-MM-yyyy-HH:mm");
+					//console.log(date);					
+					
+					$(element).draggable({ 
+					axis: "x", 
+					containment: "parent",
+					drag: function(){
+						var offset = $(element).offset();
+						var xPos = offset.left;
+						$(element).find('span').text("x: " + xPos + " START:" + date);
+					}
+				});
+			}
+		}
+
+		
 		ko.applyBindings(new TaskListViewModel());
 		console.log("Done loading tasklistviewmodel");		
 	});
