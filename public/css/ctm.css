@@ -1,3 +1,15 @@
+
+td.ctm-tablecolumn-text{
+	max-width: 80px; 
+	word-wrap:break-word;
+}
+
+td.ctm-tablecolumn-timeline{
+	max-width: 400px; 
+	word-wrap:break-word;
+}
+
+
 div.ctm-box {
 	background-color: rgb(174, 210, 255);
 	border-color: rgb(87, 143, 214);
@@ -59,6 +71,7 @@ div.ctm-levermoment-driehoek-project{
 	border-bottom: 8px solid rgb(87, 143, 214);
 	border-right:8px solid rgb(87, 143, 214);
 	border-left:8px solid transparent;
+	margin-top: -28px;
 }
 
 div.ctm-levermoment-lijn-project{

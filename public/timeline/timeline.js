@@ -2022,7 +2022,6 @@ links.Timeline.prototype.repaintCurrentTime = function() {
     if(taskorprojectItem != '' && itemIsTaskOrProject){
            var posCTMDeliveryMoment = this.ctmDeliveryTimeToScreen(taskorprojectItem, nowOffset);
 			dom.ctmLeverMoment.style.left = posCTMDeliveryMoment + "px";
-             console.log("posCTMDeliveryMoment is " + posCTMDeliveryMoment);
     }
 	
     // If we have a item and it is a task or a project item we will create the delivery line

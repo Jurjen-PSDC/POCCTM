@@ -42,7 +42,7 @@
 
 		<table class="table table-striped">
 			<caption>Tasks</caption>
-			<thead><tr><th>Name</th><th>Start</th><th>End</th><th>Completed</th><th data-bind="headerTimeLine:$data">T</th></tr></thead>
+			<thead><tr><th>Name</th><th>Start</th><th>End</th><th>Completed</th><th data-bind="headerTimeLine:$data" class="ctm-tablecolumn-timeline">T</th></tr></thead>
 			<tbody data-bind="template: { name:'project-template', foreach:projects}">
 			</tbody>
 		</table>
@@ -55,8 +55,8 @@
 <script type="text/html" id="project-template">
 	<tr>
 		<td data-bind="text:ProjectName"></td>
-		<td data-bind="text:StartMoment">Colum1</td>
-		<td data-bind="text:EndMoment">Colum2</td>
+		<td data-bind="text:StartMoment" class="ctm-tablecolumn-text">Colum1</td>
+		<td data-bind="text:EndMoment" class="ctm-tablecolumn-text">Colum2</td>
 		<td data-bind="text:Completed"></td>
 		<td>	
 			<div data-bind="projectTimeLine:$data"> </div>
@@ -65,14 +65,12 @@
 	<!-- ko foreach: Tasks -->
 	<tr>
 		<td data-bind="text:TaskName"></td>
-		<td data-bind="text:StartMoment">Colum1</td>
-		<td data-bind="text:EndMoment">Colum2</td>
+		<td data-bind="text:StartMoment" class="ctm-tablecolumn-text">Colum1</td>
+		<td data-bind="text:EndMoment" class="ctm-tablecolumn-text">Colum2</td>
 		<td data-bind="text:Completed"></td>
 		<td>	
-			<div data-bind="taskTimeLine:$data"></div>
-			<!-- <div class='ctm-levermoment-box'><div class='ctm-levermoment'><div class='ctm-levermoment-driehoek'> </div></div></div> -->
+			<div data-bind="taskTimeLine:$data" class="ctm-tablecolumn-timeline"></div>
 		</td>
-		
 	</tr>
 	<!-- /ko -->
 </script>
