@@ -64,6 +64,7 @@ ko.bindingHandlers.headerTimeLine = {
 	
 	
 ko.bindingHandlers.projectTimeLine = {
+
 	init: function(element, accessor){
 		var projectModel = accessor();
 		
@@ -121,7 +122,14 @@ ko.bindingHandlers.projectTimeLine = {
 	}
 }
 	
-	
+/////,
+	//update: function(element, valueAccessor, allBindingsAccessor, viewModel, bindingContext) {
+   //		console.log("Updating the project binding");
+   //	}
+// //
+// //
+// //
+/////
 ko.bindingHandlers.taskTimeLine = {
 	init: function(element, accessor, allBindingsAccessor, viewModel, bindingContext){
 		var taskModel = accessor();
@@ -308,8 +316,8 @@ var koProjectModel = function(project){
 				return new koTaskModel(task);
 			}));
 	self.Completed = 70;					
-	self.Scale = project.Scale;
-	self.Step = project.Step;
+	self.Scale = ko.observable(project.Scale);
+	self.Step = ko.observable(project.Step);
 }
 
 
@@ -352,5 +360,13 @@ var koProjectsModel = function(projects) {
 		return endDate;
 	});	
 	
+	self.SetScaling = function(Scale, Step){
+		for(var p =1; p < self.projects().length; p++){
+			self.projects()[p].Scale(Scale);
+			self.projects()[p].Step(Step);
+			console.log("Project NR " + p + " Scale = " + self.projects()[p].Scale() + " Step = " + self.projects()[p].Step());
+		}
+	};
+
     self.lastSavedJson = ko.observable("");
 };

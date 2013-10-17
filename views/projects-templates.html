@@ -12,8 +12,8 @@
 	<link rel="stylesheet" type="text/css" href="timeline/timeline.css">
 	<link rel="stylesheet" type="text/css" href="css/ctm.css">
 
-	<script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
-	<script src='http://ajax.aspnetcdn.com/ajax/knockout/knockout-2.2.1.js'></script>
+	<script type="text/javascript" src="js/jquery-1.10.2.min.js"></script>
+	<script type="text/javascript" src="js/knockout-2.3.0.js"></script>
 	
 </head>
 <body>
@@ -84,6 +84,7 @@ var timelinewidth = "90%";
 var timelineheigth = "80px";	
 var timelineHeaderheigth = "40px";
 var timelines = new Array();
+var viewModel;
 
 function updateRanges(start, end){
 	for(var i = 0; i < timelines.length; i++){
@@ -96,26 +97,41 @@ function updateRanges(start, end){
  */
 function switchViewScale(Scale){
 	if(Scale == 'Day'){
-		var initialProjectData = getInitialData(links.Timeline.StepDate.SCALE.HOUR, 6); 
-		ko.applyBindings(new koProjectsModel(initialProjectData));
+		//var initialProjectData = getInitialData(links.Timeline.StepDate.SCALE.HOUR, 6); 
+		//ko.applyBindings(new koProjectsModel(initialProjectData));
+		
+		viewModel.SetScaling(links.Timeline.StepDate.SCALE.HOUR, 6);
+		
+		//koProjectsModel().SetScaling(links.Timeline.StepDate.SCALE.HOUR, 6);
+		//ko.applyBindings(viewModel);
+		//
+		
+		//var count = koProjectsModel().length;
+		// 	console.log("length is" + count); 
 	}
 
 	if(Scale == 'Week'){
-		var initialProjectData = getInitialData(links.Timeline.StepDate.SCALE.DAY, 1); 
-		ko.applyBindings(new koProjectsModel(initialProjectData));
+		//var initialProjectData = getInitialData(links.Timeline.StepDate.SCALE.DAY, 1); 
+		//ko.applyBindings(new koProjectsModel(initialProjectData));
+		viewModel.SetScaling(links.Timeline.StepDate.SCALE.DAY, 1);
+		//viewModel.SetScaling(links.Timeline.StepDate.SCALE.DAY, 1);
+		//ko.applyBindings(viewModel);
 	}
 
 	if(Scale == 'Month'){
-		var initialProjectData = getInitialData(links.Timeline.StepDate.SCALE.DAY, 7); 
-		ko.applyBindings(new koProjectsModel(initialProjectData));
+		//var initialProjectData = getInitialData(links.Timeline.StepDate.SCALE.DAY, 7); 
+		viewModel.SetScaling(links.Timeline.StepDate.SCALE.DAY, 7);
+		
+		//ko.applyBindings(viewModel);
 	}
 }
-
+	
 		
 $(document).ready(function () {
 
 	var initialProjectData = getInitialData(links.Timeline.StepDate.SCALE.HOUR, 6); 
-	ko.applyBindings(new koProjectsModel(initialProjectData));
+	viewModel = new koProjectsModel(initialProjectData);
+	ko.applyBindings(viewModel);
 });
 </script>
 

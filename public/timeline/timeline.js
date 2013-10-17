@@ -117,6 +117,8 @@ links.Timeline = function(container) {
         return;
     }
 
+    this.teller = 0;
+
     // create variables and set default values
     this.dom = {};
     this.conversion = {};
@@ -762,6 +764,7 @@ links.Timeline.prototype.getDataRange = function (withMargin) {
 links.Timeline.prototype.render = function(options) {
     var frameResized = this.reflowFrame();
     var axisResized = this.reflowAxis();
+
     var groupsResized = this.reflowGroups();
     var itemsResized = this.reflowItems();
     var resized = (frameResized || axisResized || groupsResized || itemsResized);
@@ -804,7 +807,7 @@ links.Timeline.prototype.render = function(options) {
  *                                 a reflow is needed.
  */
 links.Timeline.prototype.repaint = function() {
-    var frameNeedsReflow = this.repaintFrame();
+    var frameNeedsw = this.repaintFrame();
     var axisNeedsReflow  = this.repaintAxis();
     var groupsNeedsReflow  = this.repaintGroups();
     var itemsNeedsReflow = this.repaintItems();
@@ -920,6 +923,11 @@ links.Timeline.prototype.repaintFrame = function() {
  * @return {boolean} resized    returns true if the axis is resized
  */
 links.Timeline.prototype.reflowAxis = function() {
+    
+    //console.log("REFLOW AXIS :" + this.teller);
+
+    //this.teller ++;
+
     var resized = false,
         dom = this.dom,
         options = this.options,

@@ -31,23 +31,23 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
  
-var TasksList = require('./routes/taskslist');
-var Tasks = require('./models/tasks.js');
-var tasks = new Tasks(
-    azure.createTableService(accountName, accountKey)
-    , tableName
-    , partitionKey);
+//var TasksList = require('./routes/taskslist');
+//var Tasks = require('./models/tasks.js');
+//var tasks = new Tasks(
+  //  azure.createTableService(accountName, accountKey)
+   // , tableName
+    //, partitionKey);
 
-var tasksList = new TasksList(tasks);
+//var tasksList = new TasksList(tasks);
 
-tasks.addMockTasks();
+//tasks.addMockTasks();
 
 app.get('/', function (req, res)
 {
     res.render('projects-templates.html');
 }); 
  
-app.get('/alltasks', tasksList.showTasks.bind(tasksList));
-app.get('/removetasks', tasksList.removeAllTasks.bind(tasksList));
+//app.get('/alltasks', tasksList.showTasks.bind(tasksList));
+//app.get('/removetasks', tasksList.removeAllTasks.bind(tasksList));
 
 app.listen(process.env.port || 1337);
