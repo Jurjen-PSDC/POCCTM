@@ -160,7 +160,7 @@ var getInitialData = function (){
 		
 		
 	ko.bindingHandlers.projectTimeLine = {
-		init: function(element, accessor){
+		init: function(element, accessor, allBindingsAccessor, viewModel, bindingContext){
 			var projectModel = accessor();
 			
 			// Create the JSON data table
@@ -191,8 +191,7 @@ var getInitialData = function (){
 			
 			var timeline = new links.Timeline(element);
 			function onRangeChanged(properties) {
-				var root = projectModel.$parent;
-				root.updateRangesModel(properties.start, properties.end);
+				bindingContext.$root.updateRangesModel(properties.start, properties.end);
 			}
 
 			// attach an event listener using the links events handler
