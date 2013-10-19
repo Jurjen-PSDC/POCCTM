@@ -198,7 +198,6 @@ var getInitialData = function (){
 			links.events.addListener(timeline, 'rangechange', onRangeChanged);
 		
 			function onChanged(){
-				console.log(data[0].start.toLocaleString() + " " + data[0].end.toLocaleString());
 				projectModel.StartMoment(data[0].start);
 				projectModel.EndMoment(data[0].end);
 				
@@ -262,7 +261,6 @@ var getInitialData = function (){
 			links.events.addListener(timeline, 'rangechange', onRangeChanged);
 			
 			function onChanged(){
-				console.log(data[0].start.toLocaleString() + " " + data[0].end.toLocaleString());
 				taskModel.StartMoment(data[0].start);
 				taskModel.EndMoment(data[0].end);
 			}
@@ -298,12 +296,23 @@ var koTaskModel =function (task){
 	self.TeamName= task.TeamName;
 	self.AssignedTo=ko.observable(task.AssignedTo);		
 	self.Completed = 80;
-	self.Timeline = ko.observable();
+	self.Timeline = ko.observable("");
 	
 	self.updateTimeLineRangesTask = function(start, end){
 		self.Timeline().setVisibleChartRange(start, end);
-	}
+	};
 
+	self.setScalesTask  = function(scale, step, start, end){
+		if(self.Timeline() != ""){
+			var data = new Object();
+			data.start = start;
+			data.end = end;
+			self.Timeline().updateData(0, data );
+			self.Timeline().setScale(scale,step);
+			self.Timeline().setVisibleChartRange(start, end);
+			self.Timeline().render();
+		}
+	};
 }
 
 var koProjectModel = function(project){
@@ -317,13 +326,28 @@ var koProjectModel = function(project){
 				return new koTaskModel(task);
 			}));
 	self.Completed = 70;					
-	self.Timeline = ko.observable();
+	self.Timeline = ko.observable("");
 
 
 	self.updateTimeLineRangesProject = function(start, end){
 		self.Timeline().setVisibleChartRange(start, end);
 		for(var t =0; t < self.Tasks().length; t++){
 			self.Tasks()[t].updateTimeLineRangesTask(start, end);
+		}
+	};
+
+	self.setScalesProject = function(scale, step, start, end){
+		if(self.Timeline() !==  ""){
+			var data = new Object();
+			data.start = start;
+			data.end = end;
+			self.Timeline().updateData(0, data );
+			self.Timeline().setScale(scale,step);
+			self.Timeline().setVisibleChartRange(start, end);
+			self.Timeline().render();
+		}	
+		for(var t =0; t < self.Tasks().length; t++){
+			self.Tasks()[t].setScalesTask(scale, step, start, end);
 		}
 	};
 
@@ -377,6 +401,82 @@ var koProjectsModel = function(projects) {
 			self.projects()[p].updateTimeLineRangesProject(start, end);
 		}
 	};
+
+
+	self.switchViewScales  = function(ScaleSize){
+		var scale;
+		var step;
+		var start = self.firstStartDate();
+		var end;
+		
+		if(ScaleSize == 'Day'){
+			scale = links.Timeline.StepDate.SCALE.DAY;
+			step = 1;
+			end = new Date(start + 1 * 24*3600*1000);
+		}
+
+		if(ScaleSize == 'Week'){
+			scale = links.Timeline.StepDate.SCALE.WEEKDAY;
+			step = 1;
+			end = new Date(start + 7 * 24*3600*1000);
+		}
+
+		if(ScaleSize == 'Month'){
+			scale = links.Timeline.StepDate.SCALE.WEEK;
+			step = 1;
+			end = new Date(start + 28 * 24*3600*1000);
+		}
+
+		for(var p =0; p < self.projects().length; p++){
+			self.projects()[p].setScalesProject(scale, step, start, end);
+		}
+	};
+
+	self.switchViewScalesDay  = function(data, event){
+		console.log("START switchViewScalesDay OK");
+	
+		var scale = links.Timeline.StepDate.SCALE.HOUR;
+		var step = 12;
+		var start = self.firstStartDate();
+		var end = new Date(start.getTime() + 1 * 24*3600*1000);;
+		
+		for(var p =0; p < self.projects().length; p++){
+			self.projects()[p].setScalesProject(scale, step, start, end);
+		}
+
+		console.log("switchViewScalesDay OK");
+	};
+
+	self.switchViewScalesWeek  = function(data, event){
+		console.log("START switchViewScalesWeek OK");
+	
+		var scale = links.Timeline.StepDate.SCALE.WEEKDAY;
+		var step = 1;
+		var start = self.firstStartDate();
+		var end = new Date(start.getTime() + 7 * 24*3600*1000);;
+		
+		for(var p =0; p < self.projects().length; p++){
+			self.projects()[p].setScalesProject(scale, step, start, end);
+		}
+
+		console.log("switchViewScalesWeek OK");
+	};
+
+	self.switchViewScalesMonth  = function(data, event){
+		console.log(" START switchViewScalesMonth OK");
+	
+		var scale = links.Timeline.StepDate.SCALE.WEEK;
+		var step = 7;
+		var start = self.firstStartDate();
+		var end = new Date(start.getTime() + 28 * 24*3600*1000);;
+		
+		for(var p =0; p < self.projects().length; p++){
+			self.projects()[p].setScalesProject(scale, step, start, end);
+		}
+
+		console.log("switchViewScalesMonth OK");
+	};
+
 
     self.lastSavedJson = ko.observable("");
 };
