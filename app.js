@@ -31,25 +31,9 @@ app.configure('development', function(){
   app.use(express.errorHandler());
 });
 
-/* 
-var TasksList = require('./routes/taskslist');
-var Tasks = require('./models/tasks.js');
-var tasks = new Tasks(
-    azure.createTableService(accountName, accountKey)
-    , tableName
-    , partitionKey);
-
-var tasksList = new TasksList(tasks);
-
-tasks.addMockTasks();
-app.get('/alltasks', tasksList.showTasks.bind(tasksList));
-app.get('/removetasks', tasksList.removeAllTasks.bind(tasksList));
-*/
-
 app.get('/', function (req, res)
 {
     res.render('projects-templates.html');
 }); 
  
-
 app.listen(process.env.port || 1337);

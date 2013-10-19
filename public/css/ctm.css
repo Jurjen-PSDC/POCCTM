@@ -1,11 +1,11 @@
 
 td.ctm-tablecolumn-text{
-	max-width: 80px; 
+	width: 80px; 
 	word-wrap:break-word;
 }
 
 td.ctm-tablecolumn-timeline{
-	max-width: 400px; 
+	width: 400px; 
 	word-wrap:break-word;
 }
 

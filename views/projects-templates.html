@@ -59,7 +59,7 @@
 		<td data-bind="text:EndMoment" class="ctm-tablecolumn-text">Colum2</td>
 		<td data-bind="text:Completed"></td>
 		<td>	
-			<div data-bind="projectTimeLine:$data"> </div>
+			<div data-bind="projectTimeLine:$data" class="ctm-tablecolumn-timeline"> </div>
 		</td>
 	</tr>
 	<!-- ko foreach: Tasks -->
@@ -84,6 +84,11 @@ var timelineheigth = "80px";
 var timelineHeaderheigth = "40px";
 var timelines = new Array();
 
+/*
+ *  Function to set the visible chart ranges for the timelines. 
+ *  This function is called when a timeline has been moved in time 
+ *  by the user.
+ */
 function updateRanges(start, end){
 	for(var i = 0; i < timelines.length; i++){
 			timelines[i].setVisibleChartRange(start, end);
@@ -91,7 +96,7 @@ function updateRanges(start, end){
 }
 
 /* 
- *
+ * Function to initiate the timeline scaling
  */
 function switchViewScale(Scale){
 	alert(Scale);
@@ -100,9 +105,18 @@ function switchViewScale(Scale){
 		
 $(document).ready(function () {
 	
+	// Get the data
 	var initialProjectData = getInitialData(); 
-		
-	ko.applyBindings(new koProjectsModel(initialProjectData));
+	var koModel = 	new koProjectsModel(initialProjectData)
+	// Apply the ko-binding	
+	ko.applyBindings(koModel);
+
+	var startDate = koModel.firstStartDate();
+	var endDate = koModel.lastEndDate();
+
+	// Align the timelines
+	updateRanges(startDate, endDate);
+
 });
 </script>
 
