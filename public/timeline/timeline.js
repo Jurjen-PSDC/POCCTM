@@ -2449,6 +2449,11 @@ links.Timeline.prototype.setScale = function(scale, step) {
     this.render(); // TODO: optimize: only reflow/repaint axis
 };
 
+
+links.Timeline.prototype.setScaleCTM = function(scale, step) {
+    this.step.setScale(scale, step);
+};
+
 /**
  * Enable or disable autoscaling
  * @param {boolean} enable  If true or not defined, autoscaling is enabled.

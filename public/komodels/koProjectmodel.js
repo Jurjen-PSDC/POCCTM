@@ -148,12 +148,11 @@ var getInitialData = function (){
 				
 			var timeline = new links.Timeline(element);
 			function onRangeChanged(properties) {
-					updateRanges(properties.start, properties.end);
+					projectModel.updateRangesModel(properties.start, properties.end);
 			}
 
 			// attach an event listener using the links events handler
 			links.events.addListener(timeline, 'rangechange', onRangeChanged);
-			timelines.push(timeline);
 			// Draw our timeline with the created data and options
 			timeline.draw(data, options);
 		}
@@ -192,7 +191,8 @@ var getInitialData = function (){
 			
 			var timeline = new links.Timeline(element);
 			function onRangeChanged(properties) {
-					updateRanges(properties.start, properties.end);
+				var root = projectModel.$parent;
+				root.updateRangesModel(properties.start, properties.end);
 			}
 
 			// attach an event listener using the links events handler
@@ -211,8 +211,10 @@ var getInitialData = function (){
 			
 			links.events.addListener(timeline, 'change', onChanged);
 			links.events.addListener(timeline, 'add', onAdded);
+
+			// Adding the timeline component to the project model
+			projectModel.Timeline(timeline);
 					
-			timelines.push(timeline);
 			// Draw our timeline with the created data and options
 			timeline.draw(data, options);
 		}
@@ -233,6 +235,7 @@ var getInitialData = function (){
 				}
 			];
 			var parent = bindingContext.$parent;
+
 			// specify options
 			var options = {
 				start : new Date(parent.StartMoment()),
@@ -250,7 +253,7 @@ var getInitialData = function (){
 			var timeline = new links.Timeline(element);
 			
 			function onRangeChanged(properties) {
-				updateRanges(properties.start, properties.end);
+				bindingContext.$root.updateRangesModel(properties.start, properties.end);
 				var $positionNow = $(element).find(".timeline-currenttime").position().left;
 				$(element).next().css("left", $positionNow)
 		
@@ -272,9 +275,10 @@ var getInitialData = function (){
 			
 			links.events.addListener(timeline, 'change', onChanged);
 			links.events.addListener(timeline, 'add', onAdded);
-		
-				
-			timelines.push(timeline);
+			
+			// Add the timeline component to the Task model	
+			taskModel.Timeline(timeline);
+							
 			// Draw our timeline with the created data and options
 			timeline.draw(data, options);
 			
@@ -295,8 +299,12 @@ var koTaskModel =function (task){
 	self.TeamName= task.TeamName;
 	self.AssignedTo=ko.observable(task.AssignedTo);		
 	self.Completed = 80;
-
+	self.Timeline = ko.observable();
 	
+	self.updateTimeLineRangesTask = function(start, end){
+		self.Timeline().setVisibleChartRange(start, end);
+	}
+
 }
 
 var koProjectModel = function(project){
@@ -310,6 +318,15 @@ var koProjectModel = function(project){
 				return new koTaskModel(task);
 			}));
 	self.Completed = 70;					
+	self.Timeline = ko.observable();
+
+
+	self.updateTimeLineRangesProject = function(start, end){
+		self.Timeline().setVisibleChartRange(start, end);
+		for(var t =0; t < self.Tasks().length; t++){
+			self.Tasks()[t].updateTimeLineRangesTask(start, end);
+		}
+	};
 
 }
 
@@ -353,5 +370,14 @@ var koProjectsModel = function(projects) {
 		return endDate;
 	});	
 	
+	/*
+	 * Function to update the ranges of the timeline components	
+	 */
+	self.updateRangesModel = function(start, end){
+		for(var p =0; p < self.projects().length; p++){
+			self.projects()[p].updateTimeLineRangesProject(start, end);
+		}
+	};
+
     self.lastSavedJson = ko.observable("");
 };

@@ -33,16 +33,23 @@
 	<div class="span1"></div>
 	<!-- MAIN APP SPACE -->
 		<div class="span11">
-		  <div class="btn-group">
-		  <button class="btn" onclick="switchViewScale('Day')">Day</button>
-		  <button class="btn" onclick="switchViewScale('Week')">Week</button>
-		  <button class="btn" onclick="switchViewScale('Month')">Month</button>
-		</div>
-
-
 		<table class="table table-striped">
 			<caption>Tasks</caption>
-			<thead><tr><th>Name</th><th>Start</th><th>End</th><th>Completed</th><th data-bind="headerTimeLine:$data" class="ctm-tablecolumn-timeline">T</th></tr></thead>
+			<thead>
+				<tr>
+					<th>Name</th>
+					<th>Start</th>
+					<th>End</th>
+					<th>Completed</th>
+					<th>
+						  <div class="btn-group">
+						  <button class="btn" onclick="switchViewScale('Day')">Day</button>
+						  <button class="btn" onclick="switchViewScale('Week')">Week</button>
+						  <button class="btn" onclick="switchViewScale('Month')">Month</button>
+						</div>
+					</th>
+				</tr>
+			</thead>
 			<tbody data-bind="template: { name:'project-template', foreach:projects}">
 			</tbody>
 		</table>
@@ -82,24 +89,43 @@
 var timelinewidth = "90%";	
 var timelineheigth = "80px";	
 var timelineHeaderheigth = "40px";
-var timelines = new Array();
-
-/*
- *  Function to set the visible chart ranges for the timelines. 
- *  This function is called when a timeline has been moved in time 
- *  by the user.
- */
-function updateRanges(start, end){
-	for(var i = 0; i < timelines.length; i++){
-			timelines[i].setVisibleChartRange(start, end);
-	} 
-}
+var koModel;
 
 /* 
  * Function to initiate the timeline scaling
  */
 function switchViewScale(Scale){
-	alert(Scale);
+	var scale;
+	var step;
+	var startDate = koModel.firstStartDate();
+	var endDate;
+	console.log("HALLO");
+	
+	if(Scale == 'Day'){
+		scale = links.Timeline.StepDate.SCALE.DAY;
+		step = 1;
+		endDate = new Date(startDate + 1 * 24*3600*1000);
+	}
+
+	if(Scale == 'Week'){
+		scale = links.Timeline.StepDate.SCALE.WEEKDAY;
+		step = 1;
+		endDate = new Date(startDate + 7 * 24*3600*1000);
+	}
+
+	if(Scale == 'Month'){
+		scale = links.Timeline.StepDate.SCALE.WEEK;
+		step = 1;
+		endDate = new Date(startDate + 28 * 24*3600*1000);
+	}
+
+	for(var i = 0; i < timelines.length; i++){
+			timelines[i].setScale(scale,step);
+			timelines[i].setVisibleChartRange(startDate, endDate);
+			console.log("Setting for " + i + " SCALE:" + scale + " Step:" + step + " START: " + startDate + " END: " + endDate );
+	}	
+
+	console.log("OK");
 }
 
 		
@@ -107,7 +133,7 @@ $(document).ready(function () {
 	
 	// Get the data
 	var initialProjectData = getInitialData(); 
-	var koModel = 	new koProjectsModel(initialProjectData)
+	koModel = 	new koProjectsModel(initialProjectData)
 	// Apply the ko-binding	
 	ko.applyBindings(koModel);
 
@@ -115,7 +141,7 @@ $(document).ready(function () {
 	var endDate = koModel.lastEndDate();
 
 	// Align the timelines
-	updateRanges(startDate, endDate);
+	koModel.updateRangesModel(startDate, endDate);
 
 });
 </script>
