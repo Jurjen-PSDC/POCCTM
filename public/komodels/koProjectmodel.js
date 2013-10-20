@@ -1,3 +1,6 @@
+/**
+ * KO Extender to display dates
+ */
 ko.extenders.date = function(target, format) {
 	    return ko.computed({
 	        read: function() {
@@ -16,26 +19,21 @@ ko.extenders.date = function(target, format) {
 };
 
 
-var initialData = [
-    { ProjectName: "Project 1", StartMoment: new Date(2013, 8, 1, 12, 0, 0 ),EndMoment: new Date(2013, 8, 5, 12, 0, 0 ), Tasks: [
-        { TaskName: "Taak 1", StartMoment: new Date(2013, 8, 1, 12, 0 , 0 ), EndMoment: new Date(2013, 8, 1, 14, 0, 0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" },
-		{ TaskName: "Taak 2", StartMoment: new Date(2013, 8, 5, 9, 0, 0 ), EndMoment: new Date(2013, 8, 5, 12, 0,0 ), TeamName: "TeamName A", AssignedTo: "Jurjen" }
-        ]
-    },
-    { ProjectName: "Project 2", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ),EndMoment: new Date(2013, 8, 8, 16, 0, 0), Tasks: [
-        { TaskName: "Taak A", StartMoment: new Date(2013, 8, 6, 12, 0, 0 ), EndMoment: new Date(2013, 8, 6, 18, 0, 0 ), TeamName: "TeamName B", AssignedTo: "Jurjen" },
-		{ TaskName: "Taak B", StartMoment: new Date(2013, 8, 8, 8, 0, 0), EndMoment: new Date(2013, 8, 8, 16, 0, 0), TeamName: "TeamName B", AssignedTo: "Jurjen" }
-        ]
-    }
-];
 
-
-
-
+/**
+ * Returns a random integer between to numbers
+ * @param {int} minimum value
+ * @param {int} maximum value
+ * @return {int} random int
+ */
 function getRandomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+/**
+ * Creates a test dataset.
+ * @return {array of Objects} Set of projects
+ */
 var getInitialData = function (){
 	
 	var result = new Array();
@@ -113,52 +111,12 @@ var getInitialData = function (){
 }
 
 
-	ko.bindingHandlers.headerTimeLine = {
-		init: function(element, accessor){
-					
-			var projectModel = accessor();
-			var startDate = new Date(projectModel.firstStartDate());
-			var endDate = new Date(projectModel.lastEndDate());
-					
-			// Create the JSON data table
-			var data = [
-				{
-					start: startDate,
-					end : endDate,
-					content : "",
-					className : 'ctm-box-header',
-					type : "range",
-					'ctmItemType' : 'ctm-header'			
-				}
-			];
-
-			// specify options
-			var options = {
-				start : startDate,
-				end : endDate,
-				width:  timelinewidth,
-				height: timelineHeaderheigth,
-				editable: false,   // enable dragging and editing events
-				style: "range",
-				showMajorLabels : false,
-				showMinorLabels : false,
-				scale: links.Timeline.StepDate.SCALE.DAY,
-				step: 1
-			};
-				
-			var timeline = new links.Timeline(element);
-			function onRangeChanged(properties) {
-					projectModel.updateRangesModel(properties.start, properties.end);
-			}
-
-			// attach an event listener using the links events handler
-			links.events.addListener(timeline, 'rangechange', onRangeChanged);
-			// Draw our timeline with the created data and options
-			timeline.draw(data, options);
-		}
-	}
 		
-		
+	/*
+ 	 *  Custom binding handler for binding a project timeline item to an element in the DOM. 
+ 	 *  This will create a CHAPS timeline item for a project line. The timeline item 
+ 	 *  is then saved in the Timeline property of the project. 
+ 	 */	
 	ko.bindingHandlers.projectTimeLine = {
 		init: function(element, accessor, allBindingsAccessor, viewModel, bindingContext){
 			var projectModel = accessor();
@@ -189,24 +147,28 @@ var getInitialData = function (){
 				step: 1
 			};
 			
+			// Create the timeline object
 			var timeline = new links.Timeline(element);
+
+			// Creating a function to handle the changes in the visble range (horizontal scrolling)
 			function onRangeChanged(properties) {
 				bindingContext.$root.updateRangesModel(properties.start, properties.end);
 			}
 
-			// attach an event listener using the links events handler
-			links.events.addListener(timeline, 'rangechange', onRangeChanged);
-		
+			// Creating a function to update the model when the timeline item start or end date are changed.
 			function onChanged(){
 				projectModel.StartMoment(data[0].start);
 				projectModel.EndMoment(data[0].end);
 				
 			}
 
+			// Disabling the adding of a new item
 			function onAdded(){
 				timeline.cancelAdd();
 			}
-			
+		
+			// Attach event listeners using the links events handler
+			links.events.addListener(timeline, 'rangechange', onRangeChanged);
 			links.events.addListener(timeline, 'change', onChanged);
 			links.events.addListener(timeline, 'add', onAdded);
 
@@ -217,8 +179,12 @@ var getInitialData = function (){
 			timeline.draw(data, options);
 		}
 	}
-		
-		
+	
+	/*
+ 	 *  Custom binding handler for binding a task timeline item to an element in the DOM. 
+ 	 *  This will create a CHAPS timeline item for a task line. The timeline item 
+ 	 *  is then saved in the Timeline property of the task. 
+ 	 */
 	ko.bindingHandlers.taskTimeLine = {
 		init: function(element, accessor, allBindingsAccessor, viewModel, bindingContext){
 			var taskModel = accessor();
@@ -247,9 +213,11 @@ var getInitialData = function (){
 				scale: links.Timeline.StepDate.SCALE.HOUR,
 				step: 12
 			};
-			
+		
+			// Create the timeline object
 			var timeline = new links.Timeline(element);
-			
+
+			// Creating a function to handle the changes in the visble range (horizontal scrolling)
 			function onRangeChanged(properties) {
 				bindingContext.$root.updateRangesModel(properties.start, properties.end);
 				var $positionNow = $(element).find(".timeline-currenttime").position().left;
@@ -257,19 +225,19 @@ var getInitialData = function (){
 		
 			}
 
-			// attach an event listener using the links events handler
-			links.events.addListener(timeline, 'rangechange', onRangeChanged);
-			
+			// Creating a function to update the model when the timeline item start or end date are changed.
 			function onChanged(){
 				taskModel.StartMoment(data[0].start);
 				taskModel.EndMoment(data[0].end);
 			}
 				
-				
+			// Disabling the adding of a new item
 			function onAdded(){
 				timeline.cancelAdd();
 			}
-			
+
+			// Attach event listeners using the links events handler
+			links.events.addListener(timeline, 'rangechange', onRangeChanged);
 			links.events.addListener(timeline, 'change', onChanged);
 			links.events.addListener(timeline, 'add', onAdded);
 			
@@ -285,7 +253,11 @@ var getInitialData = function (){
 		}
 	}	
 
-
+/**
+ *  KO Viewmodel for tasks
+ * 	@param {JSON data} task to create to model of.
+ *  
+ */
 var koTaskModel =function (task){
 
 	var self = this;
@@ -298,23 +270,37 @@ var koTaskModel =function (task){
 	self.Completed = 80;
 	self.Timeline = ko.observable("");
 	
+	/*
+ 	 *  Updating the Visible Chart ranges of the timeline item of the task
+ 	 */
 	self.updateTimeLineRangesTask = function(start, end){
 		self.Timeline().setVisibleChartRange(start, end);
 	};
 
+
+	/*
+ 	 *  Updating the Scales and the visible Chart ranges of the timeline 
+ 	 *  item of the task
+ 	 */
 	self.setScalesTask  = function(scale, step, start, end){
 		if(self.Timeline() != ""){
 			var data = new Object();
 			data.start = start;
 			data.end = end;
+		
 			self.Timeline().updateData(0, data );
-			self.Timeline().setScale(scale,step);
-			self.Timeline().setVisibleChartRange(start, end);
-			self.Timeline().render();
+			self.Timeline().setScaleCTM(scale,step);
+			self.Timeline().setVisibleChartRange(start, end,true);
 		}
 	};
 }
 
+
+/**
+ *  KO Viewmodel for projects
+ * 	@param {JSON data} projects to create to model of.
+ *  
+ */
 var koProjectModel = function(project){
 	var self = this;
 	
@@ -328,7 +314,10 @@ var koProjectModel = function(project){
 	self.Completed = 70;					
 	self.Timeline = ko.observable("");
 
-
+	/*
+ 	 *  Updating the Visible Chart ranges of the timeline item of the project
+ 	 *  and its tasks.
+ 	 */
 	self.updateTimeLineRangesProject = function(start, end){
 		self.Timeline().setVisibleChartRange(start, end);
 		for(var t =0; t < self.Tasks().length; t++){
@@ -336,15 +325,19 @@ var koProjectModel = function(project){
 		}
 	};
 
+	/*
+ 	 *  Updating the Scales and the visible Chart ranges of the timeline 
+ 	 *  item of the project and its tasks.
+ 	 */
 	self.setScalesProject = function(scale, step, start, end){
 		if(self.Timeline() !==  ""){
 			var data = new Object();
 			data.start = start;
 			data.end = end;
 			self.Timeline().updateData(0, data );
-			self.Timeline().setScale(scale,step);
-			self.Timeline().setVisibleChartRange(start, end);
-			self.Timeline().render();
+			self.Timeline().setScaleCTM(scale,step);
+			self.Timeline().setVisibleChartRange(start, end, true);
+			//self.Timeline().render();
 		}	
 		for(var t =0; t < self.Tasks().length; t++){
 			self.Tasks()[t].setScalesTask(scale, step, start, end);
@@ -354,21 +347,38 @@ var koProjectModel = function(project){
 }
 
 
+/**
+ * Main KO Viewmodel
+ * 	@param {JSON data} projects to create to model of.
+ * 
+ */
 var koProjectsModel = function(projects) {
-    // Data
     var self = this;
 	
+	/*
+	 *  An observable array containing all projects.  	
+	 */
 	self.projects = ko.observableArray(
 						ko.utils.arrayMap(projects, function(project) {
 							return new koProjectModel(project);
 						}));
 
+	/*
+	 * Functions of the Model. 	
+	 */
 
+	/*
+	 *  Saves the current model in the property lastSavedJson. 	
+	 */
 	self.save = function() {
         self.lastSavedJson(
 		JSON.stringify(ko.toJS(self.projects), null, 2));
 	};
-	
+
+
+	/*
+	 * Calculates the first existing starttime of all tasks. 	
+	 */	
 	self.firstStartDate = ko.computed(function(){
 		var startDate = new Date(self.projects()[0].StartMoment());
 		
@@ -381,6 +391,10 @@ var koProjectsModel = function(projects) {
 		return startDate;
 	});
 	
+
+	/*
+	 * Calculates the last existing endtime of all tasks. 	
+	 */
 	self.lastEndDate = ko.computed(function(){
 		var endDate = new Date(self.projects()[0].EndMoment());
 		
@@ -402,53 +416,28 @@ var koProjectsModel = function(projects) {
 		}
 	};
 
-
-	self.switchViewScales  = function(ScaleSize){
-		var scale;
-		var step;
-		var start = self.firstStartDate();
-		var end;
-		
-		if(ScaleSize == 'Day'){
-			scale = links.Timeline.StepDate.SCALE.DAY;
-			step = 1;
-			end = new Date(start + 1 * 24*3600*1000);
-		}
-
-		if(ScaleSize == 'Week'){
-			scale = links.Timeline.StepDate.SCALE.WEEKDAY;
-			step = 1;
-			end = new Date(start + 7 * 24*3600*1000);
-		}
-
-		if(ScaleSize == 'Month'){
-			scale = links.Timeline.StepDate.SCALE.WEEK;
-			step = 1;
-			end = new Date(start + 28 * 24*3600*1000);
-		}
-
-		for(var p =0; p < self.projects().length; p++){
-			self.projects()[p].setScalesProject(scale, step, start, end);
-		}
-	};
-
+	/*
+	*  Switching scales in the timeline to display 36 hours from the start 
+	*  of the first task in the current view.
+	*/
 	self.switchViewScalesDay  = function(data, event){
-		console.log("START switchViewScalesDay OK");
 	
 		var scale = links.Timeline.StepDate.SCALE.HOUR;
 		var step = 12;
 		var start = self.firstStartDate();
-		var end = new Date(start.getTime() + 1 * 24*3600*1000);;
+		var end = new Date(start.getTime() + 1 * 36*3600*1000);;
 		
 		for(var p =0; p < self.projects().length; p++){
 			self.projects()[p].setScalesProject(scale, step, start, end);
 		}
 
-		console.log("switchViewScalesDay OK");
 	};
 
+	/*
+	*  Switching scales in the timeline to display 7 days from the start 
+	*  of the first task in the current view.
+	*/
 	self.switchViewScalesWeek  = function(data, event){
-		console.log("START switchViewScalesWeek OK");
 	
 		var scale = links.Timeline.StepDate.SCALE.WEEKDAY;
 		var step = 1;
@@ -459,13 +448,15 @@ var koProjectsModel = function(projects) {
 			self.projects()[p].setScalesProject(scale, step, start, end);
 		}
 
-		console.log("switchViewScalesWeek OK");
 	};
 
+	/*
+	*  Switching scales in the timeline to display 28 days from the start 
+	*  of the first task in the current view.
+	*/
 	self.switchViewScalesMonth  = function(data, event){
-		console.log(" START switchViewScalesMonth OK");
 	
-		var scale = links.Timeline.StepDate.SCALE.WEEK;
+		var scale = links.Timeline.StepDate.SCALE.WEEKDAY;
 		var step = 7;
 		var start = self.firstStartDate();
 		var end = new Date(start.getTime() + 28 * 24*3600*1000);;
@@ -474,9 +465,7 @@ var koProjectsModel = function(projects) {
 			self.projects()[p].setScalesProject(scale, step, start, end);
 		}
 
-		console.log("switchViewScalesMonth OK");
 	};
 
-
-    self.lastSavedJson = ko.observable("");
+	self.lastSavedJson = ko.observable("");
 };
