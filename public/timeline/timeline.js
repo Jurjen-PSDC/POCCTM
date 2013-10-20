@@ -2117,6 +2117,12 @@ links.Timeline.prototype.repaintCustomTime = function() {
  * if there is no item selected, the button is hidden.
  */
 links.Timeline.prototype.repaintDeleteButton = function () {
+
+    // CTM-CUSTOM : Not required
+    
+    return;
+
+
     var timeline = this,
         dom = this.dom,
         frame = dom.items.frame;
@@ -2189,21 +2195,25 @@ links.Timeline.prototype.repaintDragAreas = function () {
         (item instanceof links.Timeline.ItemRange)) {
         var left = this.timeToScreen(item.start),
             right = this.timeToScreen(item.end),
-            top = item.top,
-            height = item.height;
+            top = item.top;
+            // CTM-Custom : will be set using CSS
+            //,
+            //height = item.height;
 
         dragLeft.style.left = left + 'px';
         dragLeft.style.top = top + 'px';
-        dragLeft.style.width = options.dragAreaWidth + "px";
-        dragLeft.style.height = height + 'px';
+        // CTM Custom: will be set using CSS
+        //dragLeft.style.width = options.dragAreaWidth + "px";
+        //dragLeft.style.height = height + 'px';
         dragLeft.style.display = '';
         frame.removeChild(dragLeft);
         frame.appendChild(dragLeft);
 
         dragRight.style.left = (right - options.dragAreaWidth) + 'px';
         dragRight.style.top = top + 'px';
-        dragRight.style.width = options.dragAreaWidth + "px";
-        dragRight.style.height = height + 'px';
+        // CTM Custom: will be set using CSS
+        //dragRight.style.width = options.dragAreaWidth + "px";
+        //dragRight.style.height = height + 'px';
         dragRight.style.display = '';
         frame.removeChild(dragRight);
         frame.appendChild(dragRight);

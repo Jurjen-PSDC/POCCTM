@@ -77,11 +77,22 @@ div.timeline-event-range {
 div.timeline-event-range-drag-left {
     cursor: w-resize;
     z-index: 1000;
+    background: url('img/16/moveleft.png');
+    height: 16px;
+    width: 16px;
+    margin-left: -20px;
+    margin-top:24px;
 }
 
 div.timeline-event-range-drag-right {
     cursor: e-resize;
     z-index: 1000;
+    background: url('img/16/moveright.png');
+    height: 16px;
+    width: 16px;
+    margin-left: 16px;
+    margin-top:24px;
+
 }
 
 
